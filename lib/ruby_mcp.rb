@@ -17,6 +17,10 @@ require_relative "ruby_mcp/models/engine"
 require_relative "ruby_mcp/providers/base"
 require_relative "ruby_mcp/storage/base"
 require_relative "ruby_mcp/storage/memory"
+require_relative "ruby_mcp/server/router"
+require_relative "ruby_mcp/server/base_controller"
+require_relative "ruby_mcp/server/app"
+require_relative "ruby_mcp/server/controller"
 
 module RubyMCP
   class << self
