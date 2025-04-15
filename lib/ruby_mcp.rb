@@ -15,6 +15,8 @@ require_relative "ruby_mcp/models/context"
 require_relative "ruby_mcp/models/message"
 require_relative "ruby_mcp/models/engine"
 require_relative "ruby_mcp/providers/base"
+require_relative "ruby_mcp/storage/base"
+require_relative "ruby_mcp/storage/memory"
 
 module RubyMCP
   class << self
