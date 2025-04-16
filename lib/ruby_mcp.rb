@@ -26,6 +26,8 @@ require_relative "ruby_mcp/server/contexts_controller"
 require_relative "ruby_mcp/server/messages_controller"
 require_relative "ruby_mcp/server/content_controller"
 require_relative "ruby_mcp/server/generate_controller"
+require_relative "ruby_mcp/providers/openai"
+require_relative "ruby_mcp/providers/anthropic"
 
 module RubyMCP
   class << self
