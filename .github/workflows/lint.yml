@@ -16,7 +16,5 @@ jobs:
       with:
         ruby-version: 3.2
         bundler-cache: true
-    - name: Install Standard
-      run: gem install standard
     - name: Run Standard
-      run: standard
+      run: bundle exec standardrb
