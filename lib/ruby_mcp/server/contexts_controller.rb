@@ -21,6 +21,9 @@ module RubyMCP
         end
         
         def create
+          # Validate the request
+          RubyMCP::Validator.validate_context(params)
+
           # Create a new context
           messages = []
           

@@ -28,6 +28,7 @@ require_relative "ruby_mcp/server/content_controller"
 require_relative "ruby_mcp/server/generate_controller"
 require_relative "ruby_mcp/providers/openai"
 require_relative "ruby_mcp/providers/anthropic"
+require_relative "ruby_mcp/validator"
 
 module RubyMCP
   class << self
