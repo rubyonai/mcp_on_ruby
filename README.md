@@ -1,39 +1,417 @@
-# RubyMcp
+# RubyMCP
 
-TODO: Delete this and the text below, and describe your gem
+A Ruby implementation of the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) for standardized interaction with language models.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ruby_mcp`. To experiment with that code, run `bin/console` for an interactive prompt.
+## Introduction
+
+The Model Context Protocol (MCP) provides a standardized way for applications to interact with various language model providers (like OpenAI, Anthropic, etc.) through a consistent interface. This gem implements an MCP server in Ruby, allowing Ruby applications to leverage the benefits of this protocol.
+
+Key features:
+- Standard API for multiple LLM providers
+- Context management for conversations
+- Support for streaming responses
+- File handling capabilities
+- Tool calling support
+- Authentication
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add this line to your application's Gemfile:
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+gem 'ruby_mcp'
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+And then execute:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+```
+$ bundle install
+```
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+Or install it yourself as:
 
-## Usage
+```
+$ gem install ruby_mcp
+```
 
-TODO: Write usage instructions here
+## Quick Start
+
+Here's how to get a basic MCP server running:
+
+```ruby
+require 'ruby_mcp'
+
+# Configure RubyMCP
+RubyMCP.configure do |config|
+  config.providers = {
+    openai: { api_key: ENV['OPENAI_API_KEY'] },
+    anthropic: { api_key: ENV['ANTHROPIC_API_KEY'] }
+  }
+end
+
+# Start the MCP server
+server = RubyMCP::Server::Controller.new
+server.start  # This will block the current thread
+```
+
+## Configuration Options
+
+RubyMCP offers several configuration options:
+
+```ruby
+RubyMCP.configure do |config|
+  # LLM Provider configurations
+  config.providers = {
+    openai: { 
+      api_key: ENV['OPENAI_API_KEY'],
+      api_base: 'https://api.openai.com/v1' # Optional
+    },
+    anthropic: { 
+      api_key: ENV['ANTHROPIC_API_KEY'] 
+    }
+  }
+  
+  # Storage backend (:memory, :redis, :active_record, or custom)
+  config.storage = :memory
+  
+  # Server settings
+  config.server_port = 3000
+  config.server_host = "0.0.0.0"
+  
+  # Authentication settings
+  config.auth_required = false
+  config.jwt_secret = ENV['JWT_SECRET']
+  config.token_expiry = 3600 # 1 hour
+  
+  # Limits
+  config.max_contexts = 1000
+end
+```
+
+## Server Endpoints
+
+The MCP server provides the following endpoints:
+
+### Engines
+- `GET /engines` - List available language models
+
+### Contexts
+- `POST /contexts` - Create a new conversation context
+- `GET /contexts` - List existing contexts
+- `GET /contexts/:id` - Get details of a specific context
+- `DELETE /contexts/:id` - Delete a context
+
+### Messages
+- `POST /messages` - Add a message to a context
+
+### Generation
+- `POST /generate` - Generate a response from a language model
+- `POST /generate/stream` - Stream a response with incremental updates
+
+### Content
+- `POST /content` - Upload content (files)
+- `GET /content/:context_id/:id` - Retrieve uploaded content
+
+## Detailed Usage
+
+### Creating a Context
+
+```ruby
+# Using the HTTP API
+response = Faraday.post(
+  "http://localhost:3000/contexts",
+  {
+    messages: [
+      {
+        role: "system",
+        content: "You are a helpful assistant."
+      }
+    ],
+    metadata: {
+      user_id: "user_123",
+      conversation_name: "Technical Support"
+    }
+  }.to_json,
+  "Content-Type" => "application/json"
+)
+
+context_id = JSON.parse(response.body)["id"]
+```
+
+### Adding a Message
+
+```ruby
+Faraday.post(
+  "http://localhost:3000/messages",
+  {
+    context_id: context_id,
+    role: "user",
+    content: "What is the capital of France?"
+  }.to_json,
+  "Content-Type" => "application/json"
+)
+```
+
+### Generating a Response
+
+```ruby
+response = Faraday.post(
+  "http://localhost:3000/generate",
+  {
+    context_id: context_id,
+    engine_id: "anthropic/claude-3-sonnet-20240229",
+    max_tokens: 1000,
+    temperature: 0.7
+  }.to_json,
+  "Content-Type" => "application/json"
+)
+
+assistant_response = JSON.parse(response.body)["content"]
+```
+
+### Streaming a Response
+
+```ruby
+conn = Faraday.new do |f|
+  f.request :json
+  f.response :json
+  f.adapter :net_http
+end
+
+conn.post("http://localhost:3000/generate/stream") do |req|
+  req.headers["Content-Type"] = "application/json"
+  req.body = {
+    context_id: context_id,
+    engine_id: "openai/gpt-4",
+    temperature: 0.7
+  }.to_json
+  
+  req.options.on_data = Proc.new do |chunk, size, total|
+    event_data = chunk.split("data: ").last.strip
+    next if event_data.empty? || event_data == "[DONE]"
+    
+    event = JSON.parse(event_data)
+    if event["event"] == "generation.content" && event["content"]
+      print event["content"]
+    end
+  end
+end
+```
+
+### Uploading Content
+
+```ruby
+file_data = Base64.strict_encode64(File.read("example.pdf"))
+
+Faraday.post(
+  "http://localhost:3000/content",
+  {
+    context_id: context_id,
+    type: "file",
+    filename: "example.pdf",
+    content_type: "application/pdf",
+    file_data: file_data
+  }.to_json,
+  "Content-Type" => "application/json"
+)
+```
+
+### Using Tool Calls
+
+```ruby
+tools = [
+  {
+    type: "function",
+    function: {
+      name: "get_weather",
+      description: "Get the current weather for a location",
+      parameters: {
+        type: "object",
+        properties: {
+          location: {
+            type: "string",
+            description: "City and state, e.g., San Francisco, CA"
+          }
+        },
+        required: ["location"]
+      }
+    }
+  }
+]
+
+response = Faraday.post(
+  "http://localhost:3000/generate",
+  {
+    context_id: context_id,
+    engine_id: "openai/gpt-4",
+    tools: tools
+  }.to_json,
+  "Content-Type" => "application/json"
+)
+
+if response.body["tool_calls"]
+  # Handle tool calls
+  tool_calls = response.body["tool_calls"]
+  # Process tool calls and add tool response message
+end
+```
+
+## Rails Integration
+
+For Rails applications, create an initializer at `config/initializers/ruby_mcp.rb`:
+
+```ruby
+RubyMCP.configure do |config|
+  config.providers = {
+    openai: { api_key: ENV['OPENAI_API_KEY'] },
+    anthropic: { api_key: ENV['ANTHROPIC_API_KEY'] }
+  }
+  
+  # Use memory storage in development, consider persistent storage in production
+  if Rails.env.development? || Rails.env.test?
+    config.storage = :memory
+  else
+    config.storage = :memory  # Replace with persistent option when implemented
+  end
+  
+  # Enable authentication in production
+  if Rails.env.production?
+    config.auth_required = true
+    config.jwt_secret = ENV["JWT_SECRET"]
+  end
+end
+```
+
+And mount the server in your `config/routes.rb` file:
+
+```ruby
+Rails.application.routes.draw do
+  # Mount RubyMCP at /api/mcp
+  mount_mcp_at = "/api/mcp"
+  
+  Rails.application.config.middleware.use Rack::Config do |env|
+    env["SCRIPT_NAME"] = mount_mcp_at if env["PATH_INFO"].start_with?(mount_mcp_at)
+  end
+  
+  mount RubyMCP::Server::App.new.rack_app, at: mount_mcp_at
+  
+  # Rest of your routes
+  # ...
+end
+```
+
+## Custom Storage Backend
+
+You can implement custom storage backends by extending the base storage class:
+
+```ruby
+class RedisStorage < RubyMCP::Storage::Base
+  def initialize(options = {})
+    super
+    @redis = Redis.new(options)
+  end
+  
+  def create_context(context)
+    @redis.set("context:#{context.id}", JSON.dump(context.to_h))
+    context
+  end
+  
+  def get_context(context_id)
+    data = @redis.get("context:#{context_id}")
+    raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless data
+    
+    hash = JSON.parse(data, symbolize_names: true)
+    
+    # Create message objects
+    messages = hash[:messages].map do |msg|
+      RubyMCP::Models::Message.new(
+        role: msg[:role],
+        content: msg[:content],
+        id: msg[:id],
+        metadata: msg[:metadata]
+      )
+    end
+    
+    # Create the context
+    RubyMCP::Models::Context.new(
+      id: hash[:id],
+      messages: messages,
+      metadata: hash[:metadata]
+    )
+  end
+  
+  # Implement other required methods...
+end
+
+# Configure RubyMCP to use your custom storage
+RubyMCP.configure do |config|
+  config.storage = RedisStorage.new(url: ENV["REDIS_URL"])
+end
+```
+
+## Authentication
+
+To enable JWT authentication:
+
+```ruby
+RubyMCP.configure do |config|
+  config.auth_required = true
+  config.jwt_secret = ENV['JWT_SECRET']
+  config.token_expiry = 3600 # 1 hour
+end
+```
+
+Then, create and use JWT tokens:
+
+```ruby
+# Generate a token
+require 'jwt'
+
+payload = {
+  sub: "user_123",
+  exp: Time.now.to_i + 3600
+}
+
+token = JWT.encode(payload, ENV['JWT_SECRET'], 'HS256')
+
+# Use the token in requests
+conn = Faraday.new do |f|
+  f.request :json
+  f.response :json
+  f.adapter :net_http
+end
+
+conn.get("http://localhost:3000/contexts") do |req|
+  req.headers["Authorization"] = "Bearer #{token}"
+end
+```
 
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+### Running Tests
+
+```
+bundle exec rspec
+```
+
+### Local Development Server
+
+```
+bundle exec ruby examples/simple_server/server.rb
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/ruby_mcp. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/ruby_mcp/blob/main/CODE_OF_CONDUCT.md).
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin feature/my-new-feature`)
+5. Create a new Pull Request
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/nagstler/ruby_mcp.
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the RubyMcp project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/ruby_mcp/blob/main/CODE_OF_CONDUCT.md).
