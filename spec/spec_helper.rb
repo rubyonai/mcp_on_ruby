@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 require "ruby_mcp"
+require "webmock/rspec"
+
+# Configure WebMock to allow localhost connections for testing
+WebMock.disable_net_connect!(allow_localhost: true)
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
