@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
-RSpec.describe RubyMcp do
+# frozen_string_literal: true
+
+RSpec.describe RubyMCP do
   it "has a version number" do
-    expect(RubyMcp::VERSION).not_to be nil
+    expect(RubyMCP::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  it "can be configured with a block" do
+    RubyMCP.configure do |config|
+      config.server_port = 8888
+    end
+
+    expect(RubyMCP.configuration.server_port).to eq(8888)
   end
 end

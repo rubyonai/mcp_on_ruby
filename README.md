@@ -402,6 +402,20 @@ bundle exec rspec
 bundle exec ruby examples/simple_server/server.rb
 ```
 
+## Roadmap
+
+While RubyMCP is functional for basic use cases, there are several areas planned for improvement:
+
+- [ ] Persistent storage backends (Redis, ActiveRecord)
+- [ ] Complete test coverage, including integration tests
+- [ ] Improved error handling and recovery strategies
+- [ ] Rate limiting for provider APIs
+- [ ] Proper tokenization for context window management
+- [ ] More robust streaming implementation
+- [ ] Additional provider integrations
+
+:heart: Contributions in any of these areas are welcome!
+
 ## Contributing
 
 1. Fork the repository

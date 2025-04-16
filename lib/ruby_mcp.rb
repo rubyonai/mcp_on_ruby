@@ -10,7 +10,7 @@ require "logger"
 require_relative "ruby_mcp/version"
 require_relative "ruby_mcp/errors"
 require_relative "ruby_mcp/configuration"
-require_relative "ruby_mcp/server"
+
 require_relative "ruby_mcp/models/context"
 require_relative "ruby_mcp/models/message"
 require_relative "ruby_mcp/models/engine"

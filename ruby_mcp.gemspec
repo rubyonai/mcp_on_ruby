@@ -4,7 +4,7 @@ require_relative "lib/ruby_mcp/version"
 
 Gem::Specification.new do |spec|
   spec.name = "ruby_mcp"
-  spec.version = RubyMcp::VERSION
+  spec.version = RubyMCP::VERSION
   spec.authors = ["Nagendra Dhanakeerthi"]
   spec.email = ["nagendra.dhanakeerthi@gmail.com"]
 
@@ -28,6 +28,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "jwt", "~> 2.7"
   spec.add_dependency "json-schema", "~> 4.0"
   spec.add_dependency "concurrent-ruby", "~> 1.2"
+  spec.add_dependency "webrick", "~> 1.7"
 
   spec.add_dependency "rack", "~> 2.2"
   spec.add_dependency "rack-cors", "~> 1.1"
