@@ -1,5 +1,8 @@
 # RubyMCP
 
+[![Build](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml)
+[![Test](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml)
+
 A Ruby implementation of the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) for standardized interaction with language models.
 
 ## Introduction
