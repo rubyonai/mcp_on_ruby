@@ -2,6 +2,16 @@
 
 require "ruby_mcp"
 require "webmock/rspec"
+require 'simplecov'
+SimpleCov.start do
+  add_filter "/spec/"
+  add_filter "/vendor/"
+end
+
+if ENV['CI']
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
 
 # Configure WebMock to allow localhost connections for testing
 WebMock.disable_net_connect!(allow_localhost: true)
