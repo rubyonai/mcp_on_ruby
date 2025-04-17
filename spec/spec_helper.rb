@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-require "ruby_mcp"
-require "webmock/rspec"
+
 require 'simplecov'
 require 'simplecov-cobertura'
 
@@ -16,6 +15,10 @@ SimpleCov.formatters = SimpleCov::Formatter::MultiFormatter.new([
   SimpleCov::Formatter::HTMLFormatter,
   SimpleCov::Formatter::CoberturaFormatter
 ])
+
+require "ruby_mcp"
+require "webmock/rspec"
+
 
 
 # Configure WebMock to allow localhost connections for testing
