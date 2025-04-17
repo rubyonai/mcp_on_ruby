@@ -23,8 +23,12 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
-    - name: Run tests
-      run: bundle exec rspec
+    - name: Run tests with debug info
+      run: |
+        bundle exec rspec
+        echo "Checking for coverage data..."
+        find . -name "coverage" -type d -exec ls -la {} \;
+        find . -name ".resultset.json" -type f -exec ls -la {} \;
     - name: Upload coverage to Codecov
       if: matrix.ruby-version == '3.2'  # Only upload coverage for one Ruby version
       uses: codecov/codecov-action@v3
