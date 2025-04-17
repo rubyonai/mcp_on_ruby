@@ -30,9 +30,9 @@ jobs:
         find . -name "coverage" -type d -exec ls -la {} \;
         find . -name ".resultset.json" -type f -exec ls -la {} \;
     - name: Upload coverage to Codecov
-      if: matrix.ruby-version == '3.2'  # Only upload coverage for one Ruby version
+      if: matrix.ruby-version == '3.2'
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage/coverage.xml
         fail_ci_if_error: false
-        verbose: true  # Add verbose flag to see more details

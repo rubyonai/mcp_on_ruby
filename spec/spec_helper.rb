@@ -3,20 +3,13 @@
 require "ruby_mcp"
 require "webmock/rspec"
 require 'simplecov'
-require 'codecov'
+require 'simplecov-cobertura'
 
-SimpleCov.start do
-  add_filter '/spec/'
-  add_filter '/vendor/'
-  track_files 'lib/**/*.rb'  # Explicitly tell it which files to track
-  enable_coverage :branch    # Enable branch coverage too
-end
-
-# Use this formatter setup
 SimpleCov.formatters = SimpleCov::Formatter::MultiFormatter.new([
   SimpleCov::Formatter::HTMLFormatter,
-  SimpleCov::Formatter::Codecov
+  SimpleCov::Formatter::CoberturaFormatter
 ])
+
 
 # Configure WebMock to allow localhost connections for testing
 WebMock.disable_net_connect!(allow_localhost: true)
