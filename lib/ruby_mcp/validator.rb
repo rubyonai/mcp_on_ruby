@@ -26,12 +26,20 @@ module RubyMCP
       if result.success?
         true
       else
-        error_messages = result.errors.to_h.map do |key, messages|
-          "#{key}: #{messages.join(', ')}"
-        end.join('; ')
-        
+        # This converts nested error hashes to strings properly
+        error_messages = format_errors(result.errors.to_h)
         raise RubyMCP::Errors::ValidationError, "Validation failed: #{error_messages}"
       end
+    end
+    
+    def self.format_errors(errors, prefix = '')
+      errors.map do |key, value|
+        if value.is_a?(Hash)
+          format_errors(value, "#{prefix}#{key}.")
+        else
+          "#{prefix}#{key}: #{Array(value).join(', ')}"
+        end
+      end.join('; ')
     end
   end
 end
