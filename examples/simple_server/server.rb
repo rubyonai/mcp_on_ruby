@@ -4,7 +4,7 @@ require "ruby_mcp"
 require "dotenv"
 
 # Load environment variables from .env file
-Dotenv.load
+Dotenv.load('../../.env') 
 
 # Configure RubyMCP
 RubyMCP.configure do |config|

@@ -3,9 +3,10 @@
 require "faraday"
 require "jwt"
 require "json"
-require "json-schema"
+
 require "concurrent"
 require "logger"
+require "dry-schema"
 
 require_relative "ruby_mcp/version"
 require_relative "ruby_mcp/errors"
@@ -28,6 +29,9 @@ require_relative "ruby_mcp/server/content_controller"
 require_relative "ruby_mcp/server/generate_controller"
 require_relative "ruby_mcp/providers/openai"
 require_relative "ruby_mcp/providers/anthropic"
+
+
+require_relative "ruby_mcp/schemas"
 require_relative "ruby_mcp/validator"
 
 module RubyMCP

@@ -22,6 +22,9 @@ RubyMCP provides a Ruby implementation of the Model Context Protocol:
 - File handling capabilities
 - Tool calling support
 - Authentication
+- Schema validation using dry-schema
+
+The library is designed to be straightforward to use while maintaining full compatibility with the MCP specification.
 
 The library is designed to be straightforward to use while maintaining full compatibility with the MCP specification.
 
@@ -64,6 +67,25 @@ end
 server = RubyMCP::Server::Controller.new
 server.start  # This will block the current thread
 ```
+
+### Interactive Demo
+
+The repository includes an interactive demo that walks through all the key MCP concepts:
+
+First, start the example server:
+
+```bash
+cd examples/simple_server
+ruby server.rb
+```
+
+Then, in a separate terminal, run the client:
+
+```bash
+cd examples/simple_server
+ruby client.rb
+```
+This demo provides a guided tour of the MCP functionality, showing each step of creating contexts, adding messages, and generating responses with detailed explanations.
 
 ## Configuration Options
 

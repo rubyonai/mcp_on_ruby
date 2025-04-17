@@ -1,37 +1,36 @@
 # frozen_string_literal: true
 
-require "json-schema"
+require_relative "schemas"
 
 module RubyMCP
   class Validator
     def self.validate_context(params)
-      schema_path = File.join(File.dirname(__FILE__), "schemas", "context.json")
-      validate(params, schema_path)
+      validate(params, Schemas::ContextSchema)
     end
     
     def self.validate_message(params)
-      schema_path = File.join(File.dirname(__FILE__), "schemas", "message.json")
-      validate(params, schema_path)
+      validate(params, Schemas::MessageSchema)
     end
     
     def self.validate_generate(params)
-      schema_path = File.join(File.dirname(__FILE__), "schemas", "generate.json")
-      validate(params, schema_path)
+      validate(params, Schemas::GenerateSchema)
     end
     
     def self.validate_content(params)
-      schema_path = File.join(File.dirname(__FILE__), "schemas", "content.json")
-      validate(params, schema_path)
+      validate(params, Schemas::ContentSchema)
     end
     
-    def self.validate(params, schema_path)
-      schema = JSON.parse(File.read(schema_path))
+    def self.validate(params, schema)
+      result = schema.call(params)
       
-      begin
-        JSON::Validator.validate!(schema, params)
+      if result.success?
         true
-      rescue JSON::Schema::ValidationError => e
-        raise RubyMCP::Errors::ValidationError, e.message
+      else
+        error_messages = result.errors.to_h.map do |key, messages|
+          "#{key}: #{messages.join(', ')}"
+        end.join('; ')
+        
+        raise RubyMCP::Errors::ValidationError, "Validation failed: #{error_messages}"
       end
     end
   end

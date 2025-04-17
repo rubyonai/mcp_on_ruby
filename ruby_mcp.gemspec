@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
-  spec.homepage = "https://github.com/yourusername/ruby_mcp"
+  spec.homepage = "https://github.com/nagstler/ruby_mcp"
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
@@ -26,9 +26,10 @@ Gem::Specification.new do |spec|
   spec.add_dependency "faraday", "~> 2.7"
   spec.add_dependency "faraday-net_http", "~> 3.0"
   spec.add_dependency "jwt", "~> 2.7"
-  spec.add_dependency "json-schema", "~> 4.0"
+  # spec.add_dependency "json-schema", "~> 4.0"
   spec.add_dependency "concurrent-ruby", "~> 1.2"
   spec.add_dependency "webrick", "~> 1.7"
+  spec.add_dependency "dry-schema", "~> 1.13"
 
   spec.add_dependency "rack", "~> 2.2"
   spec.add_dependency "rack-cors", "~> 1.1"
@@ -40,10 +41,12 @@ Gem::Specification.new do |spec|
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files = Dir.chdir(__dir__) do
-    `git ls-files -z`.split("\x0").reject do |f|
-      (File.expand_path(f) == __FILE__) ||
-        f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile])
-    end
+    # Use Dir.glob for files that actually exist, rather than git ls-files
+    Dir.glob("lib/**/*") + 
+    Dir.glob("*.{md,txt}") +
+    %w[LICENSE.txt README.md]
+  end.reject do |f|
+    f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile])
   end
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
