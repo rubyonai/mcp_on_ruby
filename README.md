@@ -1,21 +1,29 @@
+<div align="center">
+
 # RubyMCP
 
 [![Build](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml)
 [![Test](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml)
 
-A Ruby implementation of the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) for standardized interaction with language models.
+<strong>The Ruby way to build MCP servers and clients.</strong>
+</div>
 
 ## Introduction
 
-The Model Context Protocol (MCP) provides a standardized way for applications to interact with various language model providers (like OpenAI, Anthropic, etc.) through a consistent interface. This gem implements an MCP server in Ruby, allowing Ruby applications to leverage the benefits of this protocol.
+The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) provides a standardized way for applications to interact with various language model providers (like OpenAI, Anthropic, etc.) through a consistent interface. This gem implements an MCP server in Ruby, allowing Ruby applications to leverage the benefits of this protocol.
 
-Key features:
+## Why RubyMCP?
+
+RubyMCP provides a Ruby implementation of the Model Context Protocol:
+
 - Standard API for multiple LLM providers
 - Context management for conversations
 - Support for streaming responses
 - File handling capabilities
 - Tool calling support
 - Authentication
+
+The library is designed to be straightforward to use while maintaining full compatibility with the MCP specification.
 
 ## Installation
 
