@@ -29,8 +29,6 @@ RubyMCP provides a Ruby implementation of the Model Context Protocol:
 
 The library is designed to be straightforward to use while maintaining full compatibility with the MCP specification.
 
-The library is designed to be straightforward to use while maintaining full compatibility with the MCP specification.
-
 ## Installation
 
 Add this line to your application's Gemfile:
