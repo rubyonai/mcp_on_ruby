@@ -4,6 +4,7 @@
 
 [![Build](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml)
 [![Test](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml)
+[![codecov](https://codecov.io/github/nagstler/ruby_mcp/graph/badge.svg?token=SG4EJEIHW3)](https://codecov.io/github/nagstler/ruby_mcp)
 
 <strong>The Ruby way to build MCP servers and clients.</strong>
 </div>
