@@ -13,6 +13,9 @@
 
 The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) provides a standardized way for applications to interact with various language model providers (like OpenAI, Anthropic, etc.) through a consistent interface. This gem implements an MCP server in Ruby, allowing Ruby applications to leverage the benefits of this protocol.
 
+![design](https://github.com/user-attachments/assets/4fbce579-7602-48ed-983f-f568ed49950c)
+
+
 ## Why RubyMCP?
 
 RubyMCP provides a Ruby implementation of the Model Context Protocol:
