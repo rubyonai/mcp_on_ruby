@@ -1,9 +1,13 @@
 # Changelog
 
-## [0.1.0] - 2023-04-16
+## [0.1.0] - 2025-04-18
 
-- Initial release
-- Support for OpenAI and Anthropic providers
+Initial release of RubyMCP
+
+### Added
+- Core MCP implementation with Rack server
+- Provider support for OpenAI and Anthropic
 - In-memory storage backend
-- HTTP server implementation
-- JSON Schema validation
+- Context, message, and content management
+- Basic authentication support
+- Comprehensive test suite
