@@ -1,7 +1,7 @@
 <div align="center">
 
-# RubyMCP
-
+# MCP on Ruby
+[![Gem Version](https://badge.fury.io/rb/mcp_on_ruby.svg)](https://badge.fury.io/rb/mcp_on_ruby)
 [![Build](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![RuboCop](https://github.com/nagstler/ruby_mcp/actions/workflows/rubocop.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/rubocop.yml)
