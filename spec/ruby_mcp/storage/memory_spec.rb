@@ -74,7 +74,7 @@ RSpec.describe RubyMCP::Storage::Memory do
       expect(retrieved).to eq(content_data)
     end
 
-      describe "#list_contexts" do
+    describe "#list_contexts" do
       it "returns contexts in reverse chronological order" do
         storage = described_class.new
         
@@ -109,4 +109,32 @@ RSpec.describe RubyMCP::Storage::Memory do
         expect(contexts.size).to eq(2)
       end
     end
+
+    # spec/ruby_mcp/storage/memory_spec.rb (additions)
+  describe "#get_context" do
+    it "raises an error if the context doesn't exist" do
+      storage = described_class.new
+      
+      expect { storage.get_context("nonexistent_id") }
+        .to raise_error(RubyMCP::Errors::ContextError, /not found/i)
+    end
   end
+
+  describe "#get_content" do
+    it "raises an error if the content doesn't exist" do
+      storage = described_class.new
+      context = RubyMCP::Models::Context.new(id: "ctx_test")
+      storage.create_context(context)
+      
+      expect { storage.get_content("ctx_test", "nonexistent_content") }
+        .to raise_error(RubyMCP::Errors::ContentError, /not found/i)
+    end
+
+    it "raises an error if the context doesn't exist" do
+      storage = described_class.new
+      
+      expect { storage.get_content("nonexistent_ctx", "content_id") }
+        .to raise_error(RubyMCP::Errors::ContextError, /not found/i)
+    end
+  end
+end

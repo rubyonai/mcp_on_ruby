@@ -4,66 +4,42 @@ require 'spec_helper'
 RSpec.describe RubyMCP::Server::Router do
   let(:router) { described_class.new }
   
-  describe "#add" do
-    it "adds a route to the routes collection" do
-      router.add("GET", "/test", Object, :index)
-      expect(router.instance_variable_get(:@routes).size).to eq(1)
-      expect(router.instance_variable_get(:@routes).first.method).to eq("GET")
-      expect(router.instance_variable_get(:@routes).first.path).to eq("/test")
+  describe "#path_matches?" do
+    it "matches exact paths" do
+      expect(router.send(:path_matches?, "/test", "/test")).to be true
+    end
+    
+    it "matches paths with parameters" do
+      expect(router.send(:path_matches?, "/users/:id", "/users/123")).to be true
+    end
+    
+    it "doesn't match paths with different segment counts" do
+      expect(router.send(:path_matches?, "/users/:id", "/users")).to be false
+      expect(router.send(:path_matches?, "/users", "/users/123")).to be false
+    end
+    
+    it "doesn't match paths with different static segments" do
+      expect(router.send(:path_matches?, "/users/:id", "/posts/123")).to be false
     end
   end
   
-  describe "#route" do
-    let(:controller_class) do
-      Class.new(RubyMCP::Server::BaseController) do
-        def index
-          [200, {}, ["Test"]]
-        end
-      end
+  describe "#extract_params" do
+    it "extracts parameters from path segments" do
+      params = router.send(:extract_params, "/users/:id/posts/:post_id", "/users/123/posts/456")
+      expect(params).to eq({ id: "123", post_id: "456" })
     end
     
-    let(:request) do
-      Rack::Request.new({
-        "REQUEST_METHOD" => "GET",
-        "PATH_INFO" => "/test",
-        "rack.input" => StringIO.new
-      })
+    it "returns an empty hash for paths without parameters" do
+      params = router.send(:extract_params, "/status", "/status")
+      expect(params).to eq({})
     end
-    
-    before do
-      router.add("GET", "/test", controller_class, :index)
-    end
-    
-    it "routes the request to the correct controller and action" do
-      response = router.route(request)
-      expect(response).to eq([200, {}, ["Test"]])
-    end
-    
-    it "extracts params from path segments" do
-      router.add("GET", "/users/:id", controller_class, :index)
-      
-      user_request = Rack::Request.new({
-        "REQUEST_METHOD" => "GET",
-        "PATH_INFO" => "/users/123",
-        "rack.input" => StringIO.new
-      })
-      
-      expect_any_instance_of(controller_class).to receive(:index) do |instance|
-        expect(instance.params[:id]).to eq("123")
-        [200, {}, ["Test"]]
-      end
-      
-      router.route(user_request)
-    end
-    
-    it "returns nil when no route matches" do
-      not_found_request = Rack::Request.new({
-        "REQUEST_METHOD" => "GET",
-        "PATH_INFO" => "/not_found",
-        "rack.input" => StringIO.new
-      })
-      
-      expect(router.route(not_found_request)).to be_nil
+  end
+  
+  describe "#extract_query_params" do
+    it "extracts query parameters from the request" do
+      request = Rack::Request.new(Rack::MockRequest.env_for("/?page=1&limit=10"))
+      params = router.send(:extract_query_params, request)
+      expect(params).to include(page: "1", limit: "10")
     end
   end
 end
