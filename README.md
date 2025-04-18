@@ -3,6 +3,7 @@
 # RubyMCP
 
 [![Build](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![RuboCop](https://github.com/nagstler/ruby_mcp/actions/workflows/rubocop.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/rubocop.yml)
 [![Test](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml)
 [![codecov](https://codecov.io/github/nagstler/ruby_mcp/graph/badge.svg?token=SG4EJEIHW3)](https://codecov.io/github/nagstler/ruby_mcp)
@@ -15,6 +16,30 @@
 The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) provides a standardized way for applications to interact with various language model providers (like OpenAI, Anthropic, etc.) through a consistent interface. This gem implements an MCP server in Ruby, allowing Ruby applications to leverage the benefits of this protocol.
 
 ![design-1](https://github.com/user-attachments/assets/c1d76dc9-6aea-4cbb-a779-f0f7d85e71fb)
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Why RubyMCP?](#why-rubymcp)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+  - [Interactive Demo](#interactive-demo)
+- [Configuration Options](#configuration-options)
+- [Server Endpoints](#server-endpoints)
+- [Detailed Usage](#detailed-usage)
+  - [Creating a Context](#creating-a-context)
+  - [Adding a Message](#adding-a-message)
+  - [Generating a Response](#generating-a-response)
+  - [Streaming a Response](#streaming-a-response)
+  - [Uploading Content](#uploading-content)
+  - [Using Tool Calls](#using-tool-calls)
+- [Rails Integration](#rails-integration)
+- [Custom Storage Backend](#custom-storage-backend)
+- [Authentication](#authentication)
+- [Development](#development)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Why RubyMCP?
 
