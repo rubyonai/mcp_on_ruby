@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "securerandom"
+require 'securerandom'
 
 module RubyMCP
   module Models
@@ -12,11 +12,11 @@ module RubyMCP
 
       def initialize(role:, content:, id: nil, metadata: {})
         @id = id || "msg_#{SecureRandom.hex(10)}"
-        
+
         unless VALID_ROLES.include?(role)
           raise RubyMCP::Errors::ValidationError, "Invalid role: #{role}. Must be one of: #{VALID_ROLES.join(', ')}"
         end
-        
+
         @role = role
         @content = content
         @created_at = Time.now.utc
@@ -34,10 +34,11 @@ module RubyMCP
       end
 
       def content_type
-        return "array" if @content.is_a?(Array)
-        "text"
+        return 'array' if @content.is_a?(Array)
+
+        'text'
       end
-      
+
       def estimated_token_count
         # Very basic estimation, would need to be improved with a real tokenizer
         if @content.is_a?(String)

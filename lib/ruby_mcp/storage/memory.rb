@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "base"
+require_relative 'base'
 
 module RubyMCP
   module Storage
@@ -19,6 +19,7 @@ module RubyMCP
       def get_context(context_id)
         context = @contexts[context_id]
         raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless context
+
         context
       end
 
@@ -36,9 +37,9 @@ module RubyMCP
 
       def list_contexts(limit: 100, offset: 0)
         @contexts.values
-          .sort_by(&:updated_at)
-          .reverse
-          .slice(offset, limit) || []
+                 .sort_by(&:updated_at)
+                 .reverse
+                 .slice(offset, limit) || []
       end
 
       def add_message(context_id, message)
@@ -49,17 +50,18 @@ module RubyMCP
       end
 
       def add_content(context_id, content_id, content_data)
-        context = get_context(context_id)
+        get_context(context_id)
         @contents[context_id] ||= {}
         @contents[context_id][content_id] = content_data
         content_id
       end
 
       def get_content(context_id, content_id)
-        context = get_context(context_id)
+        get_context(context_id)
         contents = @contents[context_id] || {}
         content = contents[content_id]
         raise RubyMCP::Errors::ContentError, "Content not found: #{content_id}" unless content
+
         content
       end
     end
