@@ -60,7 +60,7 @@ The library is designed to be straightforward to use while maintaining full comp
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'ruby_mcp'
+gem 'mcp_on_ruby'
 ```
 
 And then execute:
@@ -72,7 +72,7 @@ $ bundle install
 Or install it yourself as:
 
 ```
-$ gem install ruby_mcp
+$ gem install mcp_on_ruby
 ```
 
 ## Quick Start

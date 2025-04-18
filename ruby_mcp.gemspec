@@ -3,7 +3,7 @@
 require_relative 'lib/ruby_mcp/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'ruby_mcp'
+  spec.name = "mcp_on_ruby"
   spec.version = RubyMCP::VERSION
   spec.authors = ['Nagendra Dhanakeerthi']
   spec.email = ['nagendra.dhanakeerthi@gmail.com']
@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
     to standardize interactions with AI language models
   DESC
 
-  spec.homepage = 'https://github.com/nagstler/ruby_mcp'
+  spec.homepage = "https://github.com/nagstler/mcp_on_ruby"
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.6.0'
 
