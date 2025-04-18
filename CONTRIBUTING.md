@@ -12,7 +12,7 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 This section guides you through submitting a bug report for RubyMCP.
 
-Before creating bug reports, please check [the issue list](https://github.com/nagstler/ruby_mcp/issues) to avoid duplicating an existing report. When you create a bug report, include as many details as possible:
+Before creating bug reports, please check [the issue list](https://github.com/nagstler/mcp_on_ruby/issues) to avoid duplicating an existing report. When you create a bug report, include as many details as possible:
 
 * **Use a clear and descriptive title**
 * **Describe the exact steps to reproduce the bug**

@@ -484,7 +484,7 @@ While RubyMCP is functional for basic use cases, there are several areas planned
 4. Push to the branch (`git push origin feature/my-new-feature`)
 5. Create a new Pull Request
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/nagstler/ruby_mcp.
+Bug reports and pull requests are welcome on GitHub at https://github.com/nagstler/mcp_on_ruby.
 
 ## License
 
