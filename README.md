@@ -11,51 +11,55 @@
 <strong>The Ruby way to build MCP servers and clients.</strong>
 </div>
 
-## Introduction
+## 🔍 Introduction
 
-The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) provides a standardized way for applications to interact with various language model providers (like OpenAI, Anthropic, etc.) through a consistent interface.
+The [Model Context Protocol](https://modelcontextprotocol.io) provides a standardized way for applications to interact with language models. Similar to how REST standardized web APIs, MCP creates a consistent interface for working with providers like OpenAI and Anthropic.
 
-![design-1](https://github.com/user-attachments/assets/c1d76dc9-6aea-4cbb-a779-f0f7d85e71fb)
+MCP on Ruby implements this specification with a focus on reliability and compatibility, using a clean architecture that follows Ruby conventions and best practices.
 
-## Table of Contents
+![System Component Flow (Horizontal)](https://github.com/user-attachments/assets/085ad9b8-bee0-4d60-a4b7-ecf02d07f53c)
 
-- [Introduction](#introduction)
-- [Why RubyMCP?](#why-rubymcp)
-- [Installation](#installation)
-- [Quick Start](#quick-start)
-  - [Interactive Demo](#interactive-demo)
-- [Configuration Options](#configuration-options)
-- [Server Endpoints](#server-endpoints)
-- [Detailed Usage](#detailed-usage)
+
+## 📋 Table of Contents
+
+- [🔍 Introduction](#-introduction)
+- [🌟 Why MCP on Ruby?](#-why-mcp-on-ruby)
+- [📦 Installation](#-installation)
+- [🚀 Quick Start](#-quick-start)
+  - [🎮 Interactive Demo](#-interactive-demo)
+- [⚙️ Configuration Options](#️-configuration-options)
+- [🛣️ Server Endpoints](#️-server-endpoints)
+- [📚 Detailed Usage](#-detailed-usage)
   - [Creating a Context](#creating-a-context)
   - [Adding a Message](#adding-a-message)
   - [Generating a Response](#generating-a-response)
   - [Streaming a Response](#streaming-a-response)
   - [Uploading Content](#uploading-content)
   - [Using Tool Calls](#using-tool-calls)
-- [Rails Integration](#rails-integration)
-- [Custom Storage Backend](#custom-storage-backend)
-- [Authentication](#authentication)
-- [Development](#development)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
+- [🚄 Rails Integration](#-rails-integration)
+- [💾 Custom Storage Backend](#-custom-storage-backend)
+- [🔒 Authentication](#-authentication)
+- [🛠️ Development](#️-development)
+- [🗺️ Roadmap](#️-roadmap)
+- [👥 Contributing](#-contributing)
+- [📄 License](#-license)
 
-## Why RubyMCP?
+## 🌟 Why MCP on Ruby?
 
-RubyMCP provides a Ruby implementation of the Model Context Protocol:
+**MCP on Ruby** provides a comprehensive implementation of the Model Context Protocol with these features:
 
-- Standard API for multiple LLM providers
-- Context management for conversations
-- Support for streaming responses
-- File handling capabilities
-- Tool calling support
-- Authentication
-- Schema validation using dry-schema
+- **Provider-Ready:** Pre-built adapters for OpenAI and Anthropic - just add your API key
+- **Complete Protocol Implementation:** Fully implements the MCP specification for compatibility
+- **Conversation Management:** Context handling for multi-turn conversations
+- **Flexible Storage:** Extensible storage backends
+- **Streaming Support:** Real-time response streaming for dynamic UIs
+- **File Handling:** Upload and reference files in conversations
+- **Tool Calling:** Support for LLM function calling capabilities
+- **Battle-Tested:** Comprehensive test suite ensures reliability
 
 The library is designed to be straightforward to use while maintaining full compatibility with the MCP specification.
 
-## Installation
+## 📦 Installation
 
 Add this line to your application's Gemfile:
 
@@ -75,7 +79,7 @@ Or install it yourself as:
 $ gem install mcp_on_ruby
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 Here's how to get a basic MCP server running:
 
@@ -92,29 +96,26 @@ end
 
 # Start the MCP server
 server = RubyMCP::Server::Controller.new
-server.start  # This will block the current thread
+server.start
 ```
 
-### Interactive Demo
+### 🎮 Interactive Demo
 
 The repository includes an interactive demo that walks through all the key MCP concepts:
 
-First, start the example server:
-
 ```bash
+# Terminal 1: Start the server
 cd examples/simple_server
 ruby server.rb
-```
 
-Then, in a separate terminal, run the client:
-
-```bash
+# Terminal 2: Run the client
 cd examples/simple_server
 ruby client.rb
 ```
+
 This demo provides a guided tour of the MCP functionality, showing each step of creating contexts, adding messages, and generating responses with detailed explanations.
 
-## Configuration Options
+## ⚙️ Configuration Options
 
 RubyMCP offers several configuration options:
 
@@ -148,9 +149,9 @@ RubyMCP.configure do |config|
 end
 ```
 
-## Server Endpoints
+## 🛣️ Server Endpoints
 
-The MCP server provides the following endpoints:
+The MCP server provides the following RESTful endpoints:
 
 ### Engines
 - `GET /engines` - List available language models
@@ -172,7 +173,7 @@ The MCP server provides the following endpoints:
 - `POST /content` - Upload content (files)
 - `GET /content/:context_id/:id` - Retrieve uploaded content
 
-## Detailed Usage
+## 📚 Detailed Usage
 
 ### Creating a Context
 
@@ -316,7 +317,7 @@ if response.body["tool_calls"]
 end
 ```
 
-## Rails Integration
+## 🚄 Rails Integration
 
 For Rails applications, create an initializer at `config/initializers/ruby_mcp.rb`:
 
@@ -360,7 +361,7 @@ Rails.application.routes.draw do
 end
 ```
 
-## Custom Storage Backend
+## 💾 Custom Storage Backend
 
 You can implement custom storage backends by extending the base storage class:
 
@@ -409,7 +410,7 @@ RubyMCP.configure do |config|
 end
 ```
 
-## Authentication
+## 🔒 Authentication
 
 To enable JWT authentication:
 
@@ -446,7 +447,7 @@ conn.get("http://localhost:3000/contexts") do |req|
 end
 ```
 
-## Development
+## 🛠️ Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
@@ -462,7 +463,7 @@ bundle exec rspec
 bundle exec ruby examples/simple_server/server.rb
 ```
 
-## Roadmap
+## 🗺️ Roadmap
 
 While RubyMCP is functional for basic use cases, there are several areas planned for improvement:
 
@@ -476,7 +477,7 @@ While RubyMCP is functional for basic use cases, there are several areas planned
 
 :heart: Contributions in any of these areas are welcome!
 
-## Contributing
+## 👥 Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/my-new-feature`)
@@ -486,6 +487,6 @@ While RubyMCP is functional for basic use cases, there are several areas planned
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/nagstler/mcp_on_ruby.
 
-## License
+## 📄 License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
