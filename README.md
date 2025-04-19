@@ -15,8 +15,6 @@
 
 The [Model Context Protocol](https://modelcontextprotocol.io) provides a standardized way for applications to interact with language models. Similar to how REST standardized web APIs, MCP creates a consistent interface for working with providers like OpenAI and Anthropic.
 
-MCP on Ruby implements this specification with a focus on reliability and compatibility, using a clean architecture that follows Ruby conventions and best practices.
-
 ![System Component Flow (Horizontal)](https://github.com/user-attachments/assets/085ad9b8-bee0-4d60-a4b7-ecf02d07f53c)
 
 
