@@ -11,15 +11,15 @@ SimpleCov.start do
 end
 
 SimpleCov.formatters = SimpleCov::Formatter::MultiFormatter.new([
-  SimpleCov::Formatter::HTMLFormatter,
-  SimpleCov::Formatter::CoberturaFormatter
-])
+                                                                  SimpleCov::Formatter::HTMLFormatter,
+                                                                  SimpleCov::Formatter::CoberturaFormatter
+                                                                ])
 
 # Add the spec/mocks directory to the load path
-$LOAD_PATH.unshift(File.expand_path("mocks", __dir__))
+$LOAD_PATH.unshift(File.expand_path('mocks', __dir__))
 
 # Load the mock base storage class if it's used for testing
-require "ruby_mcp/storage/base" if File.exist?(File.expand_path("mocks/ruby_mcp/storage/base.rb", __dir__))
+require 'ruby_mcp/storage/base' if File.exist?(File.expand_path('mocks/ruby_mcp/storage/base.rb', __dir__))
 
 require 'ruby_mcp'
 require 'webmock/rspec'
