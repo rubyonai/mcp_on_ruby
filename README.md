@@ -17,6 +17,7 @@ The [Model Context Protocol](https://modelcontextprotocol.io) provides a standar
 
 ![System Component Flow (Horizontal)](https://github.com/user-attachments/assets/085ad9b8-bee0-4d60-a4b7-ecf02d07f53c)
 
+> 📌 If you find this useful, **give it a ⭐ on GitHub**
 
 ## 📋 Table of Contents
 
