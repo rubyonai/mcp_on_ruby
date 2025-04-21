@@ -380,10 +380,14 @@ RSpec.describe RubyMCP::Storage::Redis do
   describe '#get_content' do
     it 'retrieves stored content' do
       # Mock Redis get to return content
-      allow(redis_client).to receive(:get).with('ruby_mcp_test:context:ctx_123456:content:cont_123').and_return(content_data)
+      allow(redis_client).to receive(:get)
+        .with('ruby_mcp_test:context:ctx_123456:content:cont_123')
+        .and_return(content_data)
 
       # Mock Redis get to return nil for encoding (not Base64)
-      allow(redis_client).to receive(:get).with('ruby_mcp_test:context:ctx_123456:content:cont_123:encoding').and_return(nil)
+      allow(redis_client).to receive(:get)
+        .with('ruby_mcp_test:context:ctx_123456:content:cont_123:encoding')
+        .and_return(nil)
 
       result = storage.get_content(context_id, content_id)
       expect(result).to eq(content_data)
@@ -393,10 +397,14 @@ RSpec.describe RubyMCP::Storage::Redis do
       encoded_data = [binary_data].pack('m0')
 
       # Mock Redis get to return Base64-encoded content
-      allow(redis_client).to receive(:get).with('ruby_mcp_test:context:ctx_123456:content:cont_123').and_return(encoded_data)
+      allow(redis_client).to receive(:get)
+        .with('ruby_mcp_test:context:ctx_123456:content:cont_123')
+        .and_return(encoded_data)
 
       # Mock Redis get to return encoding flag
-      allow(redis_client).to receive(:get).with('ruby_mcp_test:context:ctx_123456:content:cont_123:encoding').and_return('base64')
+      allow(redis_client).to receive(:get)
+        .with('ruby_mcp_test:context:ctx_123456:content:cont_123:encoding')
+        .and_return('base64')
 
       result = storage.get_content(context_id, content_id)
       expect(result).to eq(binary_data)
