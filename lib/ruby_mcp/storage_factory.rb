@@ -1,28 +1,26 @@
+# lib/ruby_mcp/storage_factory.rb
 # frozen_string_literal: true
 
 module RubyMCP
-  # Factory class for creating storage instances based on configuration
   class StorageFactory
     def self.create(config)
-      storage_config = config.storage
+      # Support both old and new configuration interfaces
+      storage_config = if config.respond_to?(:storage_config)
+                         config.storage_config
+                       else
+                         config.storage
+                       end
 
       case storage_config[:type]
       when :memory, nil
         Storage::Memory.new(storage_config)
       when :redis
-        # Ensure redis gem is available
+        # Load Redis dependencies
         begin
           require 'redis'
-        rescue LoadError
-          raise LoadError, "Redis gem is required for Redis storage. Add `gem 'redis'` to your Gemfile."
-        end
-
-        # Load Redis storage implementation
-        begin
-          require 'ruby_mcp/storage/redis'
-        rescue LoadError
-          raise LoadError,
-                'Redis storage implementation not found. Ensure redis.rb is present in lib/ruby_mcp/storage/.'
+          require_relative 'storage/redis'
+        rescue LoadError => e
+          raise LoadError, "Redis storage requires the redis gem. Add it to your Gemfile: #{e.message}"
         end
 
         Storage::Redis.new(storage_config)

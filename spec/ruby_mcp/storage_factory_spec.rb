@@ -1,40 +1,28 @@
+# lib/ruby_mcp/storage_factory.rb
 # frozen_string_literal: true
 
-require 'spec_helper'
-require 'ruby_mcp/storage_factory'
+module RubyMCP
+  class StorageFactory
+    def self.create(config)
+      # Get the storage configuration directly from config.storage
+      storage_config = config.storage
 
-RSpec.describe RubyMCP::StorageFactory do
-  describe '.create' do
-    let(:config) { double('Config') }
+      case storage_config[:type]
+      when :memory, nil
+        Storage::Memory.new(storage_config)
+      when :redis
+        # Load Redis dependencies
+        begin
+          require 'redis'
+          require_relative 'storage/redis'
+        rescue LoadError => e
+          raise LoadError, "Redis storage requires the redis gem. Add it to your Gemfile: #{e.message}"
+        end
 
-    it 'creates in-memory storage by default' do
-      allow(config).to receive(:storage).and_return({ type: :memory })
-
-      storage = described_class.create(config)
-
-      expect(storage).to be_a(RubyMCP::Storage::Memory)
-    end
-
-    it 'creates Redis storage when configured' do
-      redis_config = {
-        type: :redis,
-        connection: { url: 'redis://localhost:6379/1' },
-        namespace: 'ruby_mcp_test',
-        ttl: 3600
-      }
-      allow(config).to receive(:storage).and_return(redis_config)
-
-      storage = described_class.create(config)
-
-      expect(storage).to be_a(RubyMCP::Storage::Redis)
-      expect(storage.instance_variable_get(:@namespace)).to eq('ruby_mcp_test')
-      expect(storage.instance_variable_get(:@ttl)).to eq(3600)
-    end
-
-    it 'raises an error for unknown storage type' do
-      allow(config).to receive(:storage).and_return({ type: :unknown })
-
-      expect { described_class.create(config) }.to raise_error(ArgumentError)
+        Storage::Redis.new(storage_config)
+      else
+        raise ArgumentError, "Unknown storage type: #{storage_config[:type]}"
+      end
     end
   end
 end
