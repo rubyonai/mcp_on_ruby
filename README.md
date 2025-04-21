@@ -36,7 +36,7 @@ The [Model Context Protocol](https://modelcontextprotocol.io) provides a standar
   - [Uploading Content](#uploading-content)
   - [Using Tool Calls](#using-tool-calls)
 - [🚄 Rails Integration](#-rails-integration)
-- [💾 Custom Storage Backend](#-custom-storage-backend)
+- [💾 Custom Storage Backend](#-storage-backends)
 - [🔒 Authentication](#-authentication)
 - [🛠️ Development](#️-development)
 - [🗺️ Roadmap](#️-roadmap)
@@ -360,8 +360,38 @@ Rails.application.routes.draw do
 end
 ```
 
-## 💾 Custom Storage Backend
+## 💾 Storage Backends
 
+### Redis Storage
+
+MCP on Ruby supports Redis as a persistent storage backend:
+
+1. Add the Redis gem to your Gemfile:
+   ```ruby
+   gem 'redis', '~> 5.0'
+   ```
+
+2. Configure Redis storage:
+   ```ruby
+   RubyMCP.configure do |config|
+     config.storage = :redis
+     config.redis = {
+       url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0'),
+       namespace: "app_mcp_#{Rails.env}",
+       ttl: 86400  # 1 day in seconds
+     }
+   end
+   ```
+
+3. Access the configured client:
+   ```ruby
+   client = RubyMCP.client
+   ```
+
+For detailed integration examples, see the [[Redis Storage](https://github.com/nagstler/mcp_on_ruby/wiki/Redis-Storage)] wiki page.
+
+
+### Custom storage 
 You can implement custom storage backends by extending the base storage class:
 
 ```ruby
@@ -466,7 +496,8 @@ bundle exec ruby examples/simple_server/server.rb
 
 While RubyMCP is functional for basic use cases, there are several areas planned for improvement:
 
-- [ ] Persistent storage backends (Redis, ActiveRecord)
+- [x] Redis persistent storage backend
+- [ ] ActiveRecord storage backend
 - [ ] Complete test coverage, including integration tests
 - [ ] Improved error handling and recovery strategies
 - [ ] Rate limiting for provider APIs
