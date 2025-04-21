@@ -33,10 +33,19 @@ require_relative 'ruby_mcp/providers/anthropic'
 require_relative 'ruby_mcp/schemas'
 require_relative 'ruby_mcp/validator'
 
+require_relative 'ruby_mcp/client'
+
 module RubyMCP
   class << self
     attr_accessor :configuration
     attr_writer :logger
+
+    def client
+      @client ||= begin
+        initialize_components unless @storage
+        Client.new(@storage)
+      end
+    end
 
     def configure
       self.configuration ||= Configuration.new
@@ -47,6 +56,13 @@ module RubyMCP
       @logger ||= Logger.new($stdout).tap do |log|
         log.progname = name
       end
+    end
+
+    private
+
+    def initialize_components
+      require_relative 'ruby_mcp/storage_factory'
+      @storage = StorageFactory.create(configuration)
     end
   end
 end

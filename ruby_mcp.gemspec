@@ -37,6 +37,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'rack-cors', '~> 1.1'
+  spec.add_dependency 'redis', '~> 5.0'
 
   # Development dependencies
   spec.add_development_dependency 'vcr', '~> 6.1'

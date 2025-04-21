@@ -3,7 +3,7 @@
 module RubyMCP
   class Configuration
     attr_accessor :providers, :storage, :server_port, :server_host,
-                  :auth_required, :jwt_secret, :token_expiry, :max_contexts
+                  :auth_required, :jwt_secret, :token_expiry, :max_contexts, :redis
 
     def initialize
       @providers = {}
@@ -14,6 +14,21 @@ module RubyMCP
       @jwt_secret = nil
       @token_expiry = 3600 # 1 hour
       @max_contexts = 1000
+      @storage = :memory  # Default to memory storage
+      @redis = {}         # Default empty Redis config
+    end
+
+    def storage_config
+      if @storage == :redis
+        {
+          type: :redis,
+          connection: redis_connection_config,
+          namespace: @redis[:namespace] || 'ruby_mcp',
+          ttl: @redis[:ttl] || 86_400
+        }
+      else
+        { type: @storage }
+      end
     end
 
     def storage_instance
@@ -34,6 +49,21 @@ module RubyMCP
                               @storage # Allow custom storage instance
 
                             end
+    end
+
+    private
+
+    def redis_connection_config
+      if @redis[:url]
+        { url: @redis[:url] }
+      else
+        {
+          host: @redis[:host] || 'localhost',
+          port: @redis[:port] || 6379,
+          db: @redis[:db] || 0,
+          password: @redis[:password]
+        }.compact
+      end
     end
   end
 end
