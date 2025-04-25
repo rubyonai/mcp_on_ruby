@@ -9,7 +9,9 @@
 [![codecov](https://codecov.io/github/nagstler/ruby_mcp/graph/badge.svg?token=SG4EJEIHW3)](https://codecov.io/github/nagstler/ruby_mcp)
 
 <strong> 🚀 **Supercharge your Rails APIs**</strong> 
-<p>Turn Rails applications into MCP servers with just a few lines of code.</p>
+<p>
+  Turn your Rails application into an MCP server with just a few lines of code.
+</p>
 </div>
 
 ## 🔍 Introduction
