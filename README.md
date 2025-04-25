@@ -8,8 +8,8 @@
 [![Test](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml)
 [![codecov](https://codecov.io/github/nagstler/ruby_mcp/graph/badge.svg?token=SG4EJEIHW3)](https://codecov.io/github/nagstler/ruby_mcp)
 
-<strong> 🚀 **Supercharge your Rails APIs:**</strong> 
-<p>Transform your Rails applications into MCP servers with just a few lines of code.</p>
+<strong> 🚀 **Supercharge your Rails APIs**</strong> 
+<p>Turn Rails applications into MCP servers with just a few lines of code.</p>
 </div>
 
 ## 🔍 Introduction
