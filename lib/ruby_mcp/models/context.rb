@@ -37,6 +37,7 @@ module RubyMCP
         {
           id: @id,
           messages: @messages.map(&:to_h),
+          content_map: @content_map,
           created_at: @created_at.iso8601,
           updated_at: @updated_at.iso8601,
           metadata: @metadata

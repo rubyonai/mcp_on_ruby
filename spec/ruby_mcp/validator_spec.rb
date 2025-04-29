@@ -71,5 +71,54 @@ RSpec.describe RubyMCP::Validator do
 
       expect(RubyMCP::Validator.validate_content(params)).to be true
     end
+
+    it 'raises an error for missing context_id' do
+      params = {
+        type: 'file',
+        filename: 'test.txt',
+        file_data: 'SGVsbG8gd29ybGQ='
+      }
+
+      expect { RubyMCP::Validator.validate_content(params) }
+        .to raise_error(RubyMCP::Errors::ValidationError, /context_id/)
+    end
+
+    it 'raises an error for missing type' do
+      params = {
+        context_id: 'ctx_123abc',
+        filename: 'test.txt',
+        file_data: 'SGVsbG8gd29ybGQ='
+      }
+
+      # Mock the validation schema to ensure it checks for type
+      instance_double(Dry::Schema::JSON)
+      allow(RubyMCP::Schemas::ContentSchema).to receive(:call).with(params).and_return(
+        double(errors: { type: ['is missing'] }, success?: false)
+      )
+
+      expect { RubyMCP::Validator.validate_content(params) }
+        .to raise_error(RubyMCP::Errors::ValidationError)
+    end
+
+    it 'validates different content types' do
+      # Test image type
+      params = {
+        context_id: 'ctx_123abc',
+        type: 'image',
+        filename: 'test.jpg',
+        file_data: 'SGVsbG8gd29ybGQ='
+      }
+
+      expect(RubyMCP::Validator.validate_content(params)).to be true
+
+      # Test json type
+      params = {
+        context_id: 'ctx_123abc',
+        type: 'json',
+        data: { key: 'value' }
+      }
+
+      expect(RubyMCP::Validator.validate_content(params)).to be true
+    end
   end
 end
