@@ -291,7 +291,7 @@ module RubyMCP
           connection.drop_table("#{@table_prefix}contexts") if connection.table_exists?("#{@table_prefix}contexts")
         rescue StandardError => e
           # Log the error but continue - this handles edge cases with certain DB adapters
-          RubyMCP.logger.warn("Error checking/dropping tables: #{e.message}")
+          RubyMCP.logger&.warn("Error checking/dropping tables: #{e.message}")
         end
 
         # Create tables in proper order

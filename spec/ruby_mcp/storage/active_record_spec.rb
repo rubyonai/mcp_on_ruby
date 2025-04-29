@@ -185,7 +185,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     content_map = storage.list_content(context_id)
 
     # Verify content map
-    expect(content_map.keys.sort).to eq(%w[text1 text2 json1 binary1].sort)
+    expect(content_map.keys.sort).to eq(%w[binary1 json1 text1 text2].sort)
     expect(content_map['text1']).to eq('Text content 1')
     expect(content_map['text2']).to eq('Text content 2')
     expect(content_map['json1']).to be_a(Hash)
