@@ -30,9 +30,13 @@ require_relative 'ruby_mcp/server/generate_controller'
 require_relative 'ruby_mcp/providers/openai'
 require_relative 'ruby_mcp/providers/anthropic'
 
+# Optional storage backends - don't require them directly
+# require_relative 'ruby_mcp/storage/redis'
+# require_relative 'ruby_mcp/storage/active_record'
+
 require_relative 'ruby_mcp/schemas'
 require_relative 'ruby_mcp/validator'
-
+require_relative 'ruby_mcp/storage_factory'
 require_relative 'ruby_mcp/client'
 
 module RubyMCP
@@ -61,7 +65,6 @@ module RubyMCP
     private
 
     def initialize_components
-      require_relative 'ruby_mcp/storage_factory'
       @storage = StorageFactory.create(configuration)
     end
   end

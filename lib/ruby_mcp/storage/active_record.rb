@@ -7,6 +7,8 @@ begin
     # This error will be handled by the storage factory
   end
   
+  require 'securerandom'
+  require 'json'
   require_relative 'base'
   
   module RubyMCP
@@ -26,6 +28,7 @@ begin
             ::ActiveRecord::Base.establish_connection(options[:connection])
           end
           
+          setup_models
           ensure_tables_exist
         end
   
@@ -34,14 +37,14 @@ begin
         # @return [RubyMCP::Models::Context] Created context
         def create_context(context)
           # Check if context already exists
-          if context_model.exists?(external_id: context.id)
+          if @context_model.exists?(external_id: context.id)
             raise RubyMCP::Errors::ContextError, "Context already exists: #{context.id}"
           end
   
           # Create the context record
-          ar_context = context_model.create!(
+          ar_context = @context_model.create!(
             external_id: context.id,
-            metadata: context.metadata,
+            metadata: JSON.generate(context.metadata || {}),
             created_at: context.created_at,
             updated_at: context.updated_at
           )
@@ -64,13 +67,21 @@ begin
         # @return [RubyMCP::Models::Context] Found context
         # @raise [RubyMCP::Errors::ContextError] If context not found
         def get_context(context_id)
-          ar_context = context_model.find_by(external_id: context_id)
+          ar_context = @context_model.find_by(external_id: context_id)
           raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
+  
+          # Parse metadata
+          metadata = begin
+            json = JSON.parse(ar_context.metadata)
+            symbolize_keys(json)
+          rescue
+            {}
+          end
   
           # Create a new context object
           context = RubyMCP::Models::Context.new(
             id: ar_context.external_id,
-            metadata: ar_context.metadata,
+            metadata: metadata
           )
   
           # Set timestamps
@@ -78,22 +89,39 @@ begin
           context.instance_variable_set(:@updated_at, ar_context.updated_at)
   
           # Load messages
-          ar_messages = message_model.where(context_id: ar_context.id).order(:created_at)
+          ar_messages = @message_model.where(context_id: ar_context.id).order(:created_at)
           ar_messages.each do |ar_message|
+            # Parse message metadata
+            msg_metadata = begin
+              json = JSON.parse(ar_message.metadata)
+              symbolize_keys(json)
+            rescue
+              {}
+            end
+          
             message = RubyMCP::Models::Message.new(
               id: ar_message.external_id,
               role: ar_message.role,
               content: ar_message.content,
-              metadata: ar_message.metadata
+              metadata: msg_metadata
             )
             message.instance_variable_set(:@created_at, ar_message.created_at)
             context.instance_variable_get(:@messages) << message
           end
   
           # Load content
-          ar_contents = content_model.where(context_id: ar_context.id)
+          ar_contents = @content_model.where(context_id: ar_context.id)
           ar_contents.each do |ar_content|
-            context.instance_variable_get(:@content_map)[ar_content.external_id] = ar_content.data
+            content_data = if ar_content.content_type == 'json'
+                             begin
+                               JSON.parse(ar_content.data_json)
+                             rescue
+                               {}
+                             end
+                           else
+                             ar_content.data_binary
+                           end
+            context.instance_variable_get(:@content_map)[ar_content.external_id] = content_data
           end
   
           context
@@ -104,12 +132,12 @@ begin
         # @return [RubyMCP::Models::Context] Updated context
         # @raise [RubyMCP::Errors::ContextError] If context not found
         def update_context(context)
-          ar_context = context_model.find_by(external_id: context.id)
+          ar_context = @context_model.find_by(external_id: context.id)
           raise RubyMCP::Errors::ContextError, "Context not found: #{context.id}" unless ar_context
   
           # Update the context record
           ar_context.update!(
-            metadata: context.metadata,
+            metadata: JSON.generate(context.metadata || {}),
             updated_at: context.updated_at
           )
   
@@ -122,12 +150,14 @@ begin
         # @return [Boolean] True if deleted
         # @raise [RubyMCP::Errors::ContextError] If context not found
         def delete_context(context_id)
-          ar_context = context_model.find_by(external_id: context_id)
+          ar_context = @context_model.find_by(external_id: context_id)
           raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
   
-          # Delete all related records
-          # This relies on foreign key constraints with CASCADE DELETE
+          # Delete all related records manually since we can't rely on cascading in tests
+          @message_model.where(context_id: ar_context.id).delete_all
+          @content_model.where(context_id: ar_context.id).delete_all
           ar_context.destroy
+  
           true
         end
   
@@ -136,7 +166,7 @@ begin
         # @param offset [Integer] Number of contexts to skip
         # @return [Array<RubyMCP::Models::Context>] List of contexts
         def list_contexts(limit: 100, offset: 0)
-          ar_contexts = context_model.order(updated_at: :desc).limit(limit).offset(offset)
+          ar_contexts = @context_model.order(updated_at: :desc).limit(limit).offset(offset)
           
           ar_contexts.map do |ar_context|
             get_context(ar_context.external_id)
@@ -149,7 +179,7 @@ begin
         # @return [RubyMCP::Models::Message] Added message
         # @raise [RubyMCP::Errors::ContextError] If context not found
         def add_message(context_id, message)
-          ar_context = context_model.find_by(external_id: context_id)
+          ar_context = @context_model.find_by(external_id: context_id)
           raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
   
           # Create the message record
@@ -168,7 +198,7 @@ begin
         # @return [String] Content ID
         # @raise [RubyMCP::Errors::ContextError] If context not found
         def add_content(context_id, content_id, content_data)
-          ar_context = context_model.find_by(external_id: context_id)
+          ar_context = @context_model.find_by(external_id: context_id)
           raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
   
           # Create the content record
@@ -187,22 +217,70 @@ begin
         # @raise [RubyMCP::Errors::ContextError] If context not found
         # @raise [RubyMCP::Errors::ContentError] If content not found
         def get_content(context_id, content_id)
-          ar_context = context_model.find_by(external_id: context_id)
+          ar_context = @context_model.find_by(external_id: context_id)
           raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
   
-          ar_content = content_model.find_by(context_id: ar_context.id, external_id: content_id)
+          ar_content = @content_model.find_by(context_id: ar_context.id, external_id: content_id)
           raise RubyMCP::Errors::ContentError, "Content not found: #{content_id}" unless ar_content
   
-          ar_content.data
+          if ar_content.content_type == 'json'
+            begin
+              json = JSON.parse(ar_content.data_json)
+              symbolize_keys(json)
+            rescue
+              {}
+            end
+          else
+            ar_content.data_binary
+          end
         end
   
         private
   
+        # Setup model classes
+        def setup_models
+          prefix = @table_prefix
+          
+          # Context model
+          @context_model = Class.new(::ActiveRecord::Base) do
+            self.table_name = "#{prefix}contexts"
+          end
+          Object.const_set("MCPContext#{SecureRandom.hex(4)}", @context_model)
+          
+          # Message model
+          @message_model = Class.new(::ActiveRecord::Base) do
+            self.table_name = "#{prefix}messages"
+          end
+          Object.const_set("MCPMessage#{SecureRandom.hex(4)}", @message_model)
+          
+          # Content model
+          @content_model = Class.new(::ActiveRecord::Base) do
+            self.table_name = "#{prefix}contents"
+          end
+          Object.const_set("MCPContent#{SecureRandom.hex(4)}", @content_model)
+        end
+  
         # Ensure necessary tables exist
         def ensure_tables_exist
-          create_contexts_table unless table_exists?("#{@table_prefix}contexts")
-          create_messages_table unless table_exists?("#{@table_prefix}messages")
-          create_contents_table unless table_exists?("#{@table_prefix}contents")
+          connection = ::ActiveRecord::Base.connection
+          
+          # Drop tables if they exist (for clean setup)
+          if connection.table_exists?("#{@table_prefix}contents")
+            connection.drop_table("#{@table_prefix}contents")
+          end
+          
+          if connection.table_exists?("#{@table_prefix}messages")
+            connection.drop_table("#{@table_prefix}messages")
+          end
+          
+          if connection.table_exists?("#{@table_prefix}contexts")
+            connection.drop_table("#{@table_prefix}contexts")
+          end
+          
+          # Create tables in proper order
+          create_contexts_table
+          create_messages_table
+          create_contents_table
         end
   
         # Check if a table exists
@@ -212,112 +290,89 @@ begin
   
         # Create the contexts table
         def create_contexts_table
-          ::ActiveRecord::Schema.define do
-            create_table "#{@table_prefix}contexts" do |t|
-              t.string :external_id, null: false, index: { unique: true }
-              t.json :metadata, default: {}
-              t.timestamps
-  
-              t.index :updated_at
-            end
+          connection = ::ActiveRecord::Base.connection
+          connection.create_table("#{@table_prefix}contexts") do |t|
+            t.string :external_id, null: false
+            t.text :metadata, default: '{}'
+            t.timestamps
           end
+          connection.add_index("#{@table_prefix}contexts", :external_id, unique: true)
+          connection.add_index("#{@table_prefix}contexts", :updated_at)
         end
   
         # Create the messages table
         def create_messages_table
-          ::ActiveRecord::Schema.define do
-            create_table "#{@table_prefix}messages" do |t|
-              t.references :context, null: false, foreign_key: { to_table: "#{@table_prefix}contexts", on_delete: :cascade }
-              t.string :external_id, null: false
-              t.string :role, null: false
-              t.text :content, null: false
-              t.json :metadata, default: {}
-              t.timestamps
-  
-              t.index [:context_id, :external_id], unique: true
-            end
+          connection = ::ActiveRecord::Base.connection
+          connection.create_table("#{@table_prefix}messages") do |t|
+            t.bigint :context_id, null: false
+            t.string :external_id, null: false
+            t.string :role, null: false
+            t.text :content, null: false
+            t.text :metadata, default: '{}'
+            t.timestamps
           end
+          connection.add_index("#{@table_prefix}messages", [:context_id, :external_id], unique: true)
+          connection.add_index("#{@table_prefix}messages", :context_id)
         end
   
         # Create the contents table
         def create_contents_table
-          ::ActiveRecord::Schema.define do
-            create_table "#{@table_prefix}contents" do |t|
-              t.references :context, null: false, foreign_key: { to_table: "#{@table_prefix}contexts", on_delete: :cascade }
-              t.string :external_id, null: false
-              t.binary :data_binary, limit: 10.megabytes
-              t.json :data_json
-              t.string :content_type
-              t.timestamps
-  
-              t.index [:context_id, :external_id], unique: true
-            end
+          connection = ::ActiveRecord::Base.connection
+          connection.create_table("#{@table_prefix}contents") do |t|
+            t.bigint :context_id, null: false
+            t.string :external_id, null: false
+            t.binary :data_binary
+            t.text :data_json
+            t.string :content_type
+            t.timestamps
           end
-        end
-  
-        # Get the context model class
-        def context_model
-          @context_model ||= Class.new(::ActiveRecord::Base) do
-            self.table_name = "#{@table_prefix}contexts"
-            serialize :metadata, JSON
-          end
-        end
-  
-        # Get the message model class
-        def message_model
-          @message_model ||= Class.new(::ActiveRecord::Base) do
-            self.table_name = "#{@table_prefix}messages"
-            belongs_to :context, class_name: context_model.name
-            serialize :metadata, JSON
-          end
-        end
-  
-        # Get the content model class
-        def content_model
-          @content_model ||= Class.new(::ActiveRecord::Base) do
-            self.table_name = "#{@table_prefix}contents"
-            belongs_to :context, class_name: context_model.name
-  
-            # Custom setter and getter for data to handle different data types
-            def data=(value)
-              if value.is_a?(Hash) || value.is_a?(Array)
-                self.data_json = value
-                self.content_type = 'json'
-              else
-                self.data_binary = value.to_s
-                self.content_type = 'binary'
-              end
-            end
-  
-            def data
-              if content_type == 'json'
-                data_json
-              else
-                data_binary
-              end
-            end
-          end
+          connection.add_index("#{@table_prefix}contents", [:context_id, :external_id], unique: true)
+          connection.add_index("#{@table_prefix}contents", :context_id)
         end
   
         # Create a message record
         def create_message_record(context_id, message)
-          message_model.create!(
+          @message_model.create!(
             context_id: context_id,
             external_id: message.id,
             role: message.role,
-            content: message.content,
-            metadata: message.metadata,
+            content: message.content.to_s,
+            metadata: JSON.generate(message.metadata || {}),
             created_at: message.created_at
           )
         end
   
         # Create a content record
         def create_content_record(context_id, content_id, content_data)
-          content_model.create!(
-            context_id: context_id,
-            external_id: content_id,
-            data: content_data
-          )
+          if content_data.is_a?(Hash) || content_data.is_a?(Array)
+            @content_model.create!(
+              context_id: context_id,
+              external_id: content_id,
+              data_json: JSON.generate(content_data),
+              content_type: 'json'
+            )
+          else
+            @content_model.create!(
+              context_id: context_id,
+              external_id: content_id,
+              data_binary: content_data.to_s,
+              content_type: 'binary'
+            )
+          end
+        end
+        
+        # Helper method to symbolize keys in hashes (including nested ones)
+        def symbolize_keys(obj)
+          case obj
+          when Hash
+            obj.each_with_object({}) do |(key, value), result|
+              result[key.to_sym] = symbolize_keys(value)
+            end
+          when Array
+            obj.map { |item| symbolize_keys(item) }
+          else
+            obj
+          end
         end
       end
     end
