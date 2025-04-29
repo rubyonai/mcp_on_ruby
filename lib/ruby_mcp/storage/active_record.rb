@@ -284,21 +284,20 @@ module RubyMCP
         connection = ::ActiveRecord::Base.connection
 
         # Drop tables if they exist (for clean setup)
-        connection.drop_table("#{@table_prefix}contents") if connection.table_exists?("#{@table_prefix}contents")
-
-        connection.drop_table("#{@table_prefix}messages") if connection.table_exists?("#{@table_prefix}messages")
-
-        connection.drop_table("#{@table_prefix}contexts") if connection.table_exists?("#{@table_prefix}contexts")
+        # Use ActiveRecord's built-in table_exists? method with proper error handling
+        begin
+          connection.drop_table("#{@table_prefix}contents") if connection.table_exists?("#{@table_prefix}contents")
+          connection.drop_table("#{@table_prefix}messages") if connection.table_exists?("#{@table_prefix}messages")
+          connection.drop_table("#{@table_prefix}contexts") if connection.table_exists?("#{@table_prefix}contexts")
+        rescue => e
+          # Log the error but continue - this handles edge cases with certain DB adapters
+          RubyMCP.logger.warn("Error checking/dropping tables: #{e.message}")
+        end
 
         # Create tables in proper order
         create_contexts_table
         create_messages_table
         create_contents_table
-      end
-
-      # Check if a table exists
-      def table_exists?(table_name)
-        ::ActiveRecord::Base.connection.table_exists?(table_name)
       end
 
       # Create the contexts table
