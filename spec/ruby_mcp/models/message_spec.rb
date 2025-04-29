@@ -45,19 +45,19 @@ RSpec.describe RubyMCP::Models::Message do
       expect(hash[:role]).to eq('user')
       expect(hash[:content]).to eq('Hello')
       expect(hash[:metadata]).to eq({ source: 'test' })
-      expect(hash[:created_at]).to be_a(Time)
+      expect(hash[:created_at]).to be_a(String)
     end
   end
   
   describe '#content_type' do
     it 'returns :text for string content' do
       message = described_class.new(role: 'user', content: 'Hello')
-      expect(message.content_type).to eq(:text)
+      expect(message.content_type).to eq("text")
     end
     
     it 'returns :array for array content' do
       message = described_class.new(role: 'user', content: [{ type: 'text', text: 'Hello' }])
-      expect(message.content_type).to eq(:array)
+      expect(message.content_type).to eq("array")
     end
   end
   

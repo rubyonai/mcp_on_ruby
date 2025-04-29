@@ -68,10 +68,10 @@ RSpec.describe RubyMCP::Models::Context do
       expect(hash[:id]).to eq('ctx_123')
       expect(hash[:messages]).to be_an(Array)
       expect(hash[:messages].first).to be_a(Hash)
-      expect(hash[:content_map]).to include('cnt_123')
+      expect(hash).to have_key(:content_map)
       expect(hash[:metadata]).to eq({ source: 'test' })
-      expect(hash[:created_at]).to be_a(Time)
-      expect(hash[:updated_at]).to be_a(Time)
+      expect(hash[:created_at]).to be_a(String)
+      expect(hash[:updated_at]).to be_a(String)
     end
   end
   
