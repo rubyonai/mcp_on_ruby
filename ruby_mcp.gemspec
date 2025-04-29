@@ -27,15 +27,15 @@ Gem::Specification.new do |spec|
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   # Dependencies
+  spec.add_dependency 'concurrent-ruby', '~> 1.2'
+  spec.add_dependency 'dry-schema', '~> 1.13'
   spec.add_dependency 'faraday', '~> 2.7'
   spec.add_dependency 'faraday-net_http', '~> 3.0'
   spec.add_dependency 'jwt', '~> 2.7'
-  spec.add_dependency 'concurrent-ruby', '~> 1.2'
-  spec.add_dependency 'dry-schema', '~> 1.13'
-  spec.add_dependency 'webrick', '~> 1.7'
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'rack-cors', '~> 1.1'
-  
+  spec.add_dependency 'webrick', '~> 1.7'
+
   # Optional dependencies - add as development dependencies
   # Redis is optional for Redis storage
   spec.add_development_dependency 'redis', '~> 5.0'
@@ -44,12 +44,12 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'sqlite3', '~> 1.4'
 
   # Development dependencies
-  spec.add_development_dependency 'vcr', '~> 6.1'
-  spec.add_development_dependency 'webmock', '~> 3.18'
   spec.add_development_dependency 'codecov', '~> 0.6.0'
   spec.add_development_dependency 'rack-test', '~> 2.1'
   spec.add_development_dependency 'simplecov', '~> 0.21.2'
   spec.add_development_dependency 'simplecov-cobertura', '~> 2.1'
+  spec.add_development_dependency 'vcr', '~> 6.1'
+  spec.add_development_dependency 'webmock', '~> 3.18'
 
   # Specify which files should be added to the gem when it is released.
   spec.files = Dir.chdir(__dir__) do

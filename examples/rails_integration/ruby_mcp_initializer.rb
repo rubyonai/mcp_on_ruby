@@ -16,7 +16,7 @@ Rails.application.config.to_prepare do
     config.storage = :active_record
     config.active_record = {
       # Uses the Rails database connection automatically
-      table_prefix: "mcp_#{Rails.env}_"  # Environment-specific prefix
+      table_prefix: "mcp_#{Rails.env}_" # Environment-specific prefix
     }
 
     # Enable authentication in production

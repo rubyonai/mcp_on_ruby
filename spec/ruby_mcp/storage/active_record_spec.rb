@@ -9,7 +9,7 @@ begin
   ACTIVERECORD_AVAILABLE = true
 rescue LoadError
   ACTIVERECORD_AVAILABLE = false
-  puts "Skipping ActiveRecord tests because ActiveRecord is not available"
+  puts 'Skipping ActiveRecord tests because ActiveRecord is not available'
 end
 
 RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
@@ -47,85 +47,85 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
   it 'creates, reads, updates, and deletes contexts' do
     # Create a context
     storage.create_context(context)
-    
+
     # Retrieve the context
     retrieved = storage.get_context(context_id)
     expect(retrieved.id).to eq(context_id)
     expect(retrieved.metadata[:source]).to eq('test')
-    
+
     # Update the context
     retrieved.metadata[:updated] = true
     storage.update_context(retrieved)
-    
+
     # Verify the update
     updated = storage.get_context(context_id)
     expect(updated.metadata[:updated]).to be true
-    
+
     # Delete the context
     expect(storage.delete_context(context_id)).to be true
-    
+
     # Verify it's deleted
-    expect {
+    expect do
       storage.get_context(context_id)
-    }.to raise_error(RubyMCP::Errors::ContextError)
+    end.to raise_error(RubyMCP::Errors::ContextError)
   end
-  
+
   it 'works with messages' do
     # Create a context
     storage.create_context(context)
-    
+
     # Add a message
     storage.add_message(context_id, message)
-    
+
     # Verify the message was added
     retrieved = storage.get_context(context_id)
     expect(retrieved.messages.size).to eq(1)
     expect(retrieved.messages.first.role).to eq('user')
     expect(retrieved.messages.first.content).to eq('Hello, world!')
   end
-  
+
   it 'works with content' do
     # Create a context
     storage.create_context(context)
-    
+
     # Add text content
     storage.add_content(context_id, content_id, text_content)
-    
+
     # Verify content was added
     retrieved_content = storage.get_content(context_id, content_id)
     expect(retrieved_content).to eq(text_content)
-    
+
     # Add JSON content
     json_content_id = 'json_content'
     storage.add_content(context_id, json_content_id, json_content)
-    
+
     # Verify JSON content
     retrieved_json = storage.get_content(context_id, json_content_id)
     expect(retrieved_json).to be_a(Hash)
     expect(retrieved_json[:key1]).to eq('value1')
     expect(retrieved_json[:key2]).to be_an(Array)
   end
-  
+
   it 'handles errors appropriately' do
     # Context not found error
-    expect {
+    expect do
       storage.get_context('nonexistent')
-    }.to raise_error(RubyMCP::Errors::ContextError, /not found/)
-    
+    end.to raise_error(RubyMCP::Errors::ContextError, /not found/)
+
     # Create a context
     storage.create_context(context)
-    
+
     # Duplicate context error
-    expect {
+    expect do
       storage.create_context(context)
-    }.to raise_error(RubyMCP::Errors::ContextError, /exists/)
-    
+    end.to raise_error(RubyMCP::Errors::ContextError, /exists/)
+
     # Content not found error
-    expect {
+    expect do
       storage.get_content(context_id, 'nonexistent')
-    }.to raise_error(RubyMCP::Errors::ContentError, /not found/)
+    end.to raise_error(RubyMCP::Errors::ContentError, /not found/)
   end
-  
+
   it 'lists contexts with pagination' do
     # Create multiple contexts
     5.times do |i|
@@ -133,15 +133,15 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
       ctx.metadata[:index] = i
       storage.create_context(ctx)
     end
-    
+
     # Get with default pagination
     contexts = storage.list_contexts
     expect(contexts.size).to eq(5)
-    
+
     # Get with limit
     contexts = storage.list_contexts(limit: 2)
     expect(contexts.size).to eq(2)
-    
+
     # Get with offset
     contexts = storage.list_contexts(offset: 3)
     expect(contexts.size).to eq(2)

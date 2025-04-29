@@ -18,7 +18,7 @@ module RubyMCP
         begin
           require 'redis'
           require_relative 'storage/redis'
-        rescue LoadError => e
+        rescue LoadError
           raise LoadError, "Redis storage requires the redis gem. Add it to your Gemfile with: gem 'redis', '~> 5.0'"
         end
 
@@ -28,8 +28,9 @@ module RubyMCP
         begin
           require 'active_record'
           require_relative 'storage/active_record'
-        rescue LoadError => e
-          raise LoadError, "ActiveRecord storage requires the activerecord gem. Add it to your Gemfile with: gem 'activerecord', '~> 6.0'"
+        rescue LoadError
+          raise LoadError,
+                "ActiveRecord storage requires the activerecord gem. Add it to your Gemfile with: gem 'activerecord', '~> 6.0'"
         end
 
         Storage::ActiveRecord.new(storage_config)
