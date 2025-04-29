@@ -225,12 +225,33 @@ module RubyMCP
           begin
             json = JSON.parse(ar_content.data_json)
             symbolize_keys(json)
+          rescue JSON::ParserError => e
+            raise RubyMCP::Errors::ContentError, "Invalid JSON content: #{e.message}"
           rescue StandardError
             {}
           end
         else
           ar_content.data_binary
         end
+      end
+
+      # List all content for a context
+      # @param context_id [String] ID of the context
+      # @return [Hash<String, Object>] Map of content IDs to content data
+      # @raise [RubyMCP::Errors::ContextError] If context not found
+      def list_content(context_id)
+        ar_context = @context_model.find_by(external_id: context_id)
+        raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
+
+        content_map = {}
+        ar_contents = @content_model.where(context_id: ar_context.id)
+        
+        ar_contents.each do |ar_content|
+          content_id = ar_content.external_id
+          content_map[content_id] = get_content(context_id, content_id)
+        end
+
+        content_map
       end
 
       private
@@ -344,10 +365,15 @@ module RubyMCP
             content_type: 'json'
           )
         else
+          # Ensure binary data is properly stored
+          binary_data = content_data.to_s
+          # Force binary encoding if it's not already
+          binary_data = binary_data.b unless binary_data.encoding == Encoding::ASCII_8BIT
+          
           @content_model.create!(
             context_id: context_id,
             external_id: content_id,
-            data_binary: content_data.to_s,
+            data_binary: binary_data,
             content_type: 'binary'
           )
         end
@@ -357,9 +383,7 @@ module RubyMCP
       def symbolize_keys(obj)
         case obj
         when Hash
-          obj.each_with_object({}) do |(key, value), result|
-            result[key.to_sym] = symbolize_keys(value)
-          end
+          obj.transform_keys(&:to_sym).transform_values { |v| symbolize_keys(v) }
         when Array
           obj.map { |item| symbolize_keys(item) }
         else

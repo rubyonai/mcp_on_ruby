@@ -134,6 +134,20 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     expect do
       storage.get_content(context_id, 'nonexistent')
     end.to raise_error(RubyMCP::Errors::ContentError, /not found/)
+    
+    # Invalid JSON error
+    invalid_json_id = 'invalid_json'
+    # Create a record with invalid JSON directly
+    storage.instance_variable_get(:@content_model).create!(
+      context_id: storage.instance_variable_get(:@context_model).find_by(external_id: context_id).id,
+      external_id: invalid_json_id,
+      data_json: '{invalid_json:',
+      content_type: 'json'
+    )
+    
+    expect do
+      storage.get_content(context_id, invalid_json_id)
+    end.to raise_error(RubyMCP::Errors::ContentError, /Invalid JSON/)
   end
 
   it 'lists contexts with pagination' do
@@ -155,5 +169,28 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     # Get with offset
     contexts = storage.list_contexts(offset: 3)
     expect(contexts.size).to eq(2)
+  end
+  
+  it 'lists all content for a context' do
+    # Create a context
+    storage.create_context(context)
+    
+    # Add multiple content items
+    storage.add_content(context_id, 'text1', 'Text content 1')
+    storage.add_content(context_id, 'text2', 'Text content 2')
+    storage.add_content(context_id, 'json1', { key: 'value' })
+    storage.add_content(context_id, 'binary1', binary_content)
+    
+    # List all content
+    content_map = storage.list_content(context_id)
+    
+    # Verify content map
+    expect(content_map.keys.sort).to eq(['text1', 'text2', 'json1', 'binary1'].sort)
+    expect(content_map['text1']).to eq('Text content 1')
+    expect(content_map['text2']).to eq('Text content 2')
+    expect(content_map['json1']).to be_a(Hash)
+    expect(content_map['json1'][:key]).to eq('value')
+    expect(content_map['binary1']).to eq(binary_content)
+    expect(content_map['binary1'].encoding).to eq(Encoding::ASCII_8BIT)
   end
 end
