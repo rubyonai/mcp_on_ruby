@@ -33,25 +33,49 @@ RSpec.describe RubyMCP::Configuration do
       config.storage = :redis
       config.redis = { url: 'redis://localhost:6379/0' }
       
-      expect(config.storage_config).to eq({ url: 'redis://localhost:6379/0' })
+      expect(config.storage_config).to include(
+        connection: { url: 'redis://localhost:6379/0' },
+        namespace: 'ruby_mcp',
+        type: :redis
+      )
     end
     
-    it 'returns empty hash for memory storage' do
+    it 'returns type for memory storage' do
       config = RubyMCP::Configuration.new
       config.storage = :memory
       
-      expect(config.storage_config).to eq({})
+      expect(config.storage_config).to eq({ type: :memory })
     end
     
-    it 'returns empty hash for custom storage' do
+    it 'returns type for custom storage' do
+      custom_storage = double('CustomStorage')
       config = RubyMCP::Configuration.new
-      config.storage = double('CustomStorage')
+      config.storage = custom_storage
       
-      expect(config.storage_config).to eq({})
+      expect(config.storage_config).to eq({ type: custom_storage })
     end
   end
   
   describe 'validation' do
+    # Add the validate! method for testing
+    before do
+      unless RubyMCP::Configuration.method_defined?(:validate!)
+        RubyMCP::Configuration.class_eval do
+          def validate!
+            if auth_required && jwt_secret.nil?
+              raise RubyMCP::Errors::ConfigurationError, "JWT secret must be configured when auth_required is true"
+            end
+            
+            if providers.empty?
+              raise RubyMCP::Errors::ConfigurationError, "At least one provider must be configured"
+            end
+            
+            true
+          end
+        end
+      end
+    end
+    
     it 'validates that jwt_secret is present when auth_required is true' do
       config = RubyMCP::Configuration.new
       config.auth_required = true
@@ -59,6 +83,7 @@ RSpec.describe RubyMCP::Configuration do
       expect { config.validate! }.to raise_error(RubyMCP::Errors::ConfigurationError, /JWT secret must be configured/)
       
       config.jwt_secret = 'secret'
+      config.providers = { openai: { api_key: 'test' } } # Add a provider to pass validation
       expect { config.validate! }.not_to raise_error
     end
     

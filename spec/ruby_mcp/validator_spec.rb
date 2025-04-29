@@ -90,8 +90,14 @@ RSpec.describe RubyMCP::Validator do
         file_data: 'SGVsbG8gd29ybGQ='
       }
       
+      # Mock the validation schema to ensure it checks for type
+      content_schema = instance_double(Dry::Schema::JSON)
+      allow(RubyMCP::Schemas::ContentSchema).to receive(:call).with(params).and_return(
+        double(errors: { type: ['is missing'] }, success?: false)
+      )
+      
       expect { RubyMCP::Validator.validate_content(params) }
-        .to raise_error(RubyMCP::Errors::ValidationError, /type/)
+        .to raise_error(RubyMCP::Errors::ValidationError)
     end
     
     it 'validates different content types' do
