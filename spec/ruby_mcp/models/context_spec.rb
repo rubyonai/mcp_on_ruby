@@ -46,17 +46,17 @@ RSpec.describe RubyMCP::Models::Context do
 
   describe '#add_content' do
     let(:context) { described_class.new }
-    
+
     it 'adds content to the content map' do
       context.add_content('cnt_123', { type: 'file', data: 'test' })
       expect(context.content_map['cnt_123']).to eq({ type: 'file', data: 'test' })
     end
-    
+
     it 'returns the content_id' do
       result = context.add_content('cnt_456', { type: 'image', data: 'image_data' })
       expect(result).to eq('cnt_456')
     end
-    
+
     it 'updates the updated_at timestamp' do
       original_time = context.updated_at
       sleep(0.001) # Ensure time difference
@@ -67,15 +67,15 @@ RSpec.describe RubyMCP::Models::Context do
   
   describe '#get_content' do
     let(:context) { described_class.new }
-    
+
     it 'retrieves content by id' do
       content_data = { type: 'file', data: 'test_content' }
       context.add_content('cnt_123', content_data)
-      
+
       result = context.get_content('cnt_123')
       expect(result).to eq(content_data)
     end
-    
+
     it 'returns nil for non-existent content' do
       result = context.get_content('nonexistent')
       expect(result).to be_nil

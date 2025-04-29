@@ -32,26 +32,26 @@ RSpec.describe RubyMCP::Configuration do
       config = RubyMCP::Configuration.new
       config.storage = :redis
       config.redis = { url: 'redis://localhost:6379/0' }
-      
+
       expect(config.storage_config).to include(
         connection: { url: 'redis://localhost:6379/0' },
         namespace: 'ruby_mcp',
         type: :redis
       )
     end
-    
+
     it 'returns type for memory storage' do
       config = RubyMCP::Configuration.new
       config.storage = :memory
-      
+
       expect(config.storage_config).to eq({ type: :memory })
     end
-    
+
     it 'returns type for custom storage' do
       custom_storage = double('CustomStorage')
       config = RubyMCP::Configuration.new
       config.storage = custom_storage
-      
+
       expect(config.storage_config).to eq({ type: custom_storage })
     end
   end
@@ -63,13 +63,15 @@ RSpec.describe RubyMCP::Configuration do
         RubyMCP::Configuration.class_eval do
           def validate!
             if auth_required && jwt_secret.nil?
-              raise RubyMCP::Errors::ConfigurationError, "JWT secret must be configured when auth_required is true"
+              raise RubyMCP::Errors::ConfigurationError,
+                    "JWT secret must be configured when auth_required is true"
             end
-            
+
             if providers.empty?
-              raise RubyMCP::Errors::ConfigurationError, "At least one provider must be configured"
+              raise RubyMCP::Errors::ConfigurationError,
+                    "At least one provider must be configured"
             end
-            
+
             true
           end
         end

@@ -119,31 +119,31 @@ RSpec.describe RubyMCP::Client do
       context_id = 'ctx_123'
       content_id = 'cnt_456'
       content_data = { type: 'file', data: 'test content' }
-      
+
       expect(storage).to receive(:get_content).with(context_id, content_id).and_return(content_data)
-      
+
       result = client.get_content(context_id, content_id)
       expect(result).to eq(content_data)
     end
-    
+
     it 'handles errors when content is not found' do
       context_id = 'ctx_123'
       content_id = 'nonexistent'
-      
+
       expect(storage).to receive(:get_content).with(context_id, content_id)
         .and_raise(RubyMCP::Errors::ContentError.new("Content not found"))
-      
+
       expect { client.get_content(context_id, content_id) }
         .to raise_error(RubyMCP::Errors::ContentError, /Content not found/)
     end
-    
+
     it 'handles errors when context is not found' do
       context_id = 'nonexistent'
       content_id = 'cnt_456'
-      
+
       expect(storage).to receive(:get_content).with(context_id, content_id)
         .and_raise(RubyMCP::Errors::ContextError.new("Context not found"))
-      
+
       expect { client.get_content(context_id, content_id) }
         .to raise_error(RubyMCP::Errors::ContextError, /Context not found/)
     end
@@ -153,25 +153,25 @@ RSpec.describe RubyMCP::Client do
     it 'handles storage errors during context creation' do
       messages = [{ role: 'user', content: 'Hello' }]
       context = instance_double(RubyMCP::Models::Context)
-      
+
       expect(RubyMCP::Models::Context).to receive(:new).and_return(context)
       expect(storage).to receive(:create_context).with(context)
         .and_raise(RubyMCP::Errors::ContextError.new("Context already exists"))
-      
+
       expect { client.create_context(messages) }
         .to raise_error(RubyMCP::Errors::ContextError, /Context already exists/)
     end
-    
+
     it 'handles storage errors during message addition' do
       context_id = 'ctx_123'
       role = 'user'
       content = 'Hello'
       message = instance_double(RubyMCP::Models::Message)
-      
+
       expect(RubyMCP::Models::Message).to receive(:new).and_return(message)
       expect(storage).to receive(:add_message).with(context_id, message)
         .and_raise(RubyMCP::Errors::ContextError.new("Context not found"))
-      
+
       expect { client.add_message(context_id, role, content) }
         .to raise_error(RubyMCP::Errors::ContextError, /Context not found/)
     end
