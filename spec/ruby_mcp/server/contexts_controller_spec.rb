@@ -159,8 +159,11 @@ RSpec.describe RubyMCP::Server::ContextsController do
       
       expect(storage).to receive(:delete_context).with('ctx_123').and_return(true)
       
-      # Skip the actual call since it's failing
-      skip "destroy method has an issue with to_h on TrueClass"
+      status, _, body = controller.destroy
+      
+      expect(status).to eq(200)
+      response = JSON.parse(body.first)
+      expect(response['success']).to eq(true)
     end
   end
 end
