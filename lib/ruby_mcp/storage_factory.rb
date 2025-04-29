@@ -30,7 +30,8 @@ module RubyMCP
           require_relative 'storage/active_record'
         rescue LoadError
           raise LoadError,
-                "ActiveRecord storage requires the activerecord gem. Add it to your Gemfile with: gem 'activerecord', '~> 6.0'"
+                "ActiveRecord storage requires the activerecord gem. Add it to your Gemfile with:
+                gem 'activerecord', '~> 6.0'"
         end
 
         Storage::ActiveRecord.new(storage_config)

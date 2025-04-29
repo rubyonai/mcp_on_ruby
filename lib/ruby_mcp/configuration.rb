@@ -50,7 +50,8 @@ module RubyMCP
                                 RubyMCP::Storage::Redis.new(storage_config)
                               rescue LoadError
                                 raise RubyMCP::Errors::ConfigurationError,
-                                      "Redis storage requires the redis gem. Add it to your Gemfile with: gem 'redis', '~> 5.0'"
+                                      "Redis storage requires the redis gem. Add it to your Gemfile with:
+                                      gem 'redis', '~> 5.0'"
                               end
                             when :active_record
                               begin
@@ -59,7 +60,8 @@ module RubyMCP
                                 RubyMCP::Storage::ActiveRecord.new(storage_config)
                               rescue LoadError
                                 raise RubyMCP::Errors::ConfigurationError,
-                                      "ActiveRecord storage requires the activerecord gem. Add it to your Gemfile with: gem 'activerecord', '~> 6.0'"
+                                      "ActiveRecord storage requires the activerecord gem. Add it to your Gemfile with:
+                                      gem 'activerecord', '~> 6.0'"
                               end
                             else
                               unless @storage.is_a?(RubyMCP::Storage::Base)
