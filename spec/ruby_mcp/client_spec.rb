@@ -64,7 +64,7 @@ RSpec.describe RubyMCP::Client do
       content = 'Hello'
       message = instance_double(RubyMCP::Models::Message)
       
-      expect(RubyMCP::Models::Message).to receive(:new).with(role: role, content: content).and_return(message)
+      expect(RubyMCP::Models::Message).to receive(:new).with(role: role, content: content, metadata: {}).and_return(message)
       expect(storage).to receive(:add_message).with(context_id, message).and_return(message)
       
       result = client.add_message(context_id, role, content)
