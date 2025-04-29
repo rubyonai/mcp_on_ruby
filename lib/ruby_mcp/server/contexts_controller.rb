@@ -53,10 +53,14 @@ module RubyMCP
       end
 
       def destroy
-        context = storage.delete_context(params[:id])
-        ok(context.to_h)
-      rescue RubyMCP::Errors::ContextError => e
-        not_found(e.message)
+        context_id = params[:id]
+        
+        begin
+          storage.delete_context(context_id)
+          ok({ success: true })
+        rescue RubyMCP::Errors::ContextError => e
+          not_found("Context not found: #{e.message}")
+        end
       end
     end
   end
