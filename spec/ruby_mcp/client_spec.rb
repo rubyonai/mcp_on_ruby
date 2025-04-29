@@ -131,7 +131,7 @@ RSpec.describe RubyMCP::Client do
       content_id = 'nonexistent'
 
       expect(storage).to receive(:get_content).with(context_id, content_id)
-        .and_raise(RubyMCP::Errors::ContentError.new("Content not found"))
+                                              .and_raise(RubyMCP::Errors::ContentError.new('Content not found'))
 
       expect { client.get_content(context_id, content_id) }
         .to raise_error(RubyMCP::Errors::ContentError, /Content not found/)
@@ -142,13 +142,13 @@ RSpec.describe RubyMCP::Client do
       content_id = 'cnt_456'
 
       expect(storage).to receive(:get_content).with(context_id, content_id)
-        .and_raise(RubyMCP::Errors::ContextError.new("Context not found"))
+                                              .and_raise(RubyMCP::Errors::ContextError.new('Context not found'))
 
       expect { client.get_content(context_id, content_id) }
         .to raise_error(RubyMCP::Errors::ContextError, /Context not found/)
     end
   end
-  
+
   describe 'error handling' do
     it 'handles storage errors during context creation' do
       messages = [{ role: 'user', content: 'Hello' }]
@@ -156,7 +156,7 @@ RSpec.describe RubyMCP::Client do
 
       expect(RubyMCP::Models::Context).to receive(:new).and_return(context)
       expect(storage).to receive(:create_context).with(context)
-        .and_raise(RubyMCP::Errors::ContextError.new("Context already exists"))
+                                                 .and_raise(RubyMCP::Errors::ContextError.new('Context already exists'))
 
       expect { client.create_context(messages) }
         .to raise_error(RubyMCP::Errors::ContextError, /Context already exists/)
@@ -170,7 +170,7 @@ RSpec.describe RubyMCP::Client do
 
       expect(RubyMCP::Models::Message).to receive(:new).and_return(message)
       expect(storage).to receive(:add_message).with(context_id, message)
-        .and_raise(RubyMCP::Errors::ContextError.new("Context not found"))
+                                              .and_raise(RubyMCP::Errors::ContextError.new('Context not found'))
 
       expect { client.add_message(context_id, role, content) }
         .to raise_error(RubyMCP::Errors::ContextError, /Context not found/)
