@@ -245,7 +245,7 @@ module RubyMCP
 
         content_map = {}
         ar_contents = @content_model.where(context_id: ar_context.id)
-        
+
         ar_contents.each do |ar_content|
           content_id = ar_content.external_id
           content_map[content_id] = get_content(context_id, content_id)
@@ -289,7 +289,7 @@ module RubyMCP
           connection.drop_table("#{@table_prefix}contents") if connection.table_exists?("#{@table_prefix}contents")
           connection.drop_table("#{@table_prefix}messages") if connection.table_exists?("#{@table_prefix}messages")
           connection.drop_table("#{@table_prefix}contexts") if connection.table_exists?("#{@table_prefix}contexts")
-        rescue => e
+        rescue StandardError => e
           # Log the error but continue - this handles edge cases with certain DB adapters
           RubyMCP.logger.warn("Error checking/dropping tables: #{e.message}")
         end
@@ -368,7 +368,7 @@ module RubyMCP
           binary_data = content_data.to_s
           # Force binary encoding if it's not already
           binary_data = binary_data.b unless binary_data.encoding == Encoding::ASCII_8BIT
-          
+
           @content_model.create!(
             context_id: context_id,
             external_id: content_id,

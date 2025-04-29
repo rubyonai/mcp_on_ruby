@@ -104,11 +104,11 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     expect(retrieved_json).to be_a(Hash)
     expect(retrieved_json[:key1]).to eq('value1')
     expect(retrieved_json[:key2]).to be_an(Array)
-    
+
     # Add binary content
     binary_content_id = 'binary_content'
     storage.add_content(context_id, binary_content_id, binary_content)
-    
+
     # Verify binary content
     retrieved_binary = storage.get_content(context_id, binary_content_id)
     expect(retrieved_binary).to eq(binary_content)
@@ -134,7 +134,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     expect do
       storage.get_content(context_id, 'nonexistent')
     end.to raise_error(RubyMCP::Errors::ContentError, /not found/)
-    
+
     # Invalid JSON error
     invalid_json_id = 'invalid_json'
     # Create a record with invalid JSON directly
@@ -144,7 +144,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
       data_json: '{invalid_json:',
       content_type: 'json'
     )
-    
+
     expect do
       storage.get_content(context_id, invalid_json_id)
     end.to raise_error(RubyMCP::Errors::ContentError, /Invalid JSON/)
@@ -170,22 +170,22 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     contexts = storage.list_contexts(offset: 3)
     expect(contexts.size).to eq(2)
   end
-  
+
   it 'lists all content for a context' do
     # Create a context
     storage.create_context(context)
-    
+
     # Add multiple content items
     storage.add_content(context_id, 'text1', 'Text content 1')
     storage.add_content(context_id, 'text2', 'Text content 2')
     storage.add_content(context_id, 'json1', { key: 'value' })
     storage.add_content(context_id, 'binary1', binary_content)
-    
+
     # List all content
     content_map = storage.list_content(context_id)
-    
+
     # Verify content map
-    expect(content_map.keys.sort).to eq(['text1', 'text2', 'json1', 'binary1'].sort)
+    expect(content_map.keys.sort).to eq(%w[text1 text2 json1 binary1].sort)
     expect(content_map['text1']).to eq('Text content 1')
     expect(content_map['text2']).to eq('Text content 2')
     expect(content_map['json1']).to be_a(Hash)
