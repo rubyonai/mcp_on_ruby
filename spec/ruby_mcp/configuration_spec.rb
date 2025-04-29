@@ -26,7 +26,7 @@ RSpec.describe RubyMCP::Configuration do
 
     expect { config.storage_instance }.to raise_error(RubyMCP::Errors::ConfigurationError)
   end
-  
+
   describe '#storage_config' do
     it 'returns redis configuration when storage is :redis' do
       config = RubyMCP::Configuration.new
@@ -55,7 +55,7 @@ RSpec.describe RubyMCP::Configuration do
       expect(config.storage_config).to eq({ type: custom_storage })
     end
   end
-  
+
   describe 'validation' do
     # Add the validate! method for testing
     before do
@@ -64,12 +64,12 @@ RSpec.describe RubyMCP::Configuration do
           def validate!
             if auth_required && jwt_secret.nil?
               raise RubyMCP::Errors::ConfigurationError,
-                    "JWT secret must be configured when auth_required is true"
+                    'JWT secret must be configured when auth_required is true'
             end
 
             if providers.empty?
               raise RubyMCP::Errors::ConfigurationError,
-                    "At least one provider must be configured"
+                    'At least one provider must be configured'
             end
 
             true
@@ -77,23 +77,23 @@ RSpec.describe RubyMCP::Configuration do
         end
       end
     end
-    
+
     it 'validates that jwt_secret is present when auth_required is true' do
       config = RubyMCP::Configuration.new
       config.auth_required = true
-      
+
       expect { config.validate! }.to raise_error(RubyMCP::Errors::ConfigurationError, /JWT secret must be configured/)
-      
+
       config.jwt_secret = 'secret'
       config.providers = { openai: { api_key: 'test' } } # Add a provider to pass validation
       expect { config.validate! }.not_to raise_error
     end
-    
+
     it 'validates that at least one provider is configured' do
       config = RubyMCP::Configuration.new
-      
+
       expect { config.validate! }.to raise_error(RubyMCP::Errors::ConfigurationError, /At least one provider/)
-      
+
       config.providers = { openai: { api_key: 'test' } }
       expect { config.validate! }.not_to raise_error
     end

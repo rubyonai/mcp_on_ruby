@@ -71,7 +71,7 @@ RSpec.describe RubyMCP::Validator do
 
       expect(RubyMCP::Validator.validate_content(params)).to be true
     end
-    
+
     it 'raises an error for missing context_id' do
       params = {
         type: 'file',
@@ -91,7 +91,7 @@ RSpec.describe RubyMCP::Validator do
       }
 
       # Mock the validation schema to ensure it checks for type
-      content_schema = instance_double(Dry::Schema::JSON)
+      instance_double(Dry::Schema::JSON)
       allow(RubyMCP::Schemas::ContentSchema).to receive(:call).with(params).and_return(
         double(errors: { type: ['is missing'] }, success?: false)
       )

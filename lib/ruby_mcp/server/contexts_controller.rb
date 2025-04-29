@@ -54,7 +54,7 @@ module RubyMCP
 
       def destroy
         context_id = params[:id]
-        
+
         begin
           storage.delete_context(context_id)
           ok({ success: true })

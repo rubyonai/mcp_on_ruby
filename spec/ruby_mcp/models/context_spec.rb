@@ -64,7 +64,7 @@ RSpec.describe RubyMCP::Models::Context do
       expect(context.updated_at).to be > original_time
     end
   end
-  
+
   describe '#get_content' do
     let(:context) { described_class.new }
 
