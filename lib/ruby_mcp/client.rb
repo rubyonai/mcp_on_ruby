@@ -31,7 +31,7 @@ module RubyMCP
       storage.add_message(context_id, message)
     end
 
-    def add_content(context_id, content_id = nil, content_data)
+    def add_content(context_id, content_data, content_id = nil)
       content_id ||= "cnt_#{SecureRandom.hex(10)}"
       storage.add_content(context_id, content_id, content_data)
     end

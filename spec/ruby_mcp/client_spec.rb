@@ -97,7 +97,7 @@ RSpec.describe RubyMCP::Client do
 
       expect(storage).to receive(:add_content).with(context_id, content_id, content_data).and_return(content_id)
 
-      result = client.add_content(context_id, content_id, content_data)
+      result = client.add_content(context_id, content_data, content_id)
       expect(result).to eq(content_id)
     end
 
@@ -109,7 +109,7 @@ RSpec.describe RubyMCP::Client do
       expect(storage).to receive(:add_content).with(context_id, 'cnt_random_hex',
                                                     content_data).and_return('cnt_random_hex')
 
-      result = client.add_content(context_id, nil, content_data)
+      result = client.add_content(context_id, content_data)
       expect(result).to eq('cnt_random_hex')
     end
   end

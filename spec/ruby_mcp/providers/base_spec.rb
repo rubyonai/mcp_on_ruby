@@ -45,7 +45,7 @@ RSpec.describe RubyMCP::Providers::Base do
     it 'uses the configured api_base if provided' do
       # Create a test subclass that exposes the protected method
       test_provider_class = Class.new(described_class) do
-        def get_api_base
+        def api_base_value
           api_base
         end
 
@@ -55,13 +55,13 @@ RSpec.describe RubyMCP::Providers::Base do
       end
 
       provider = test_provider_class.new(api_base: 'https://custom-api.example.com')
-      expect(provider.get_api_base).to eq('https://custom-api.example.com')
+      expect(provider.api_base_value).to eq('https://custom-api.example.com')
     end
 
     it 'uses the default api_base if not configured' do
       # Create a test subclass that exposes the protected method
       test_provider_class = Class.new(described_class) do
-        def get_api_base
+        def api_base_value
           api_base
         end
 
@@ -71,7 +71,7 @@ RSpec.describe RubyMCP::Providers::Base do
       end
 
       provider = test_provider_class.new
-      expect(provider.get_api_base).to eq('https://default-api.example.com')
+      expect(provider.api_base_value).to eq('https://default-api.example.com')
     end
   end
 
@@ -79,7 +79,7 @@ RSpec.describe RubyMCP::Providers::Base do
     it 'returns the lowercase class name without namespace' do
       # Create a test subclass that exposes the protected method
       test_provider_class = Class.new(described_class) do
-        def get_provider_name
+        def provider_name_value
           provider_name
         end
       end
@@ -88,7 +88,7 @@ RSpec.describe RubyMCP::Providers::Base do
       stub_const('RubyMCP::Providers::TestProvider', test_provider_class)
 
       provider = RubyMCP::Providers::TestProvider.new
-      expect(provider.get_provider_name).to eq('testprovider')
+      expect(provider.provider_name_value).to eq('testprovider')
     end
   end
 end
