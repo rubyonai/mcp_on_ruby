@@ -104,6 +104,16 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     expect(retrieved_json).to be_a(Hash)
     expect(retrieved_json[:key1]).to eq('value1')
     expect(retrieved_json[:key2]).to be_an(Array)
+    
+    # Add binary content
+    binary_content_id = 'binary_content'
+    storage.add_content(context_id, binary_content_id, binary_content)
+    
+    # Verify binary content
+    retrieved_binary = storage.get_content(context_id, binary_content_id)
+    expect(retrieved_binary).to eq(binary_content)
+    expect(retrieved_binary.encoding).to eq(Encoding::UTF_8) # ActiveRecord converts to UTF-8
+    expect(retrieved_binary.b).to eq(binary_content.b) # Compare binary content
   end
 
   it 'handles errors appropriately' do
