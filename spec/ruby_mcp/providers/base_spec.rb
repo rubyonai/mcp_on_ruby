@@ -40,23 +40,55 @@ RSpec.describe RubyMCP::Providers::Base do
     end
   end
   
-  describe '#api_base' do
-    it 'returns the configured api_base if provided' do
-      provider = described_class.new(api_base: 'https://custom-api.example.com')
-      # Skip this test since api_base is protected
-      skip "api_base is a protected method"
+  # Test protected methods indirectly through public methods
+  describe 'api_base (indirectly)' do
+    it 'uses the configured api_base if provided' do
+      # Create a test subclass that exposes the protected method
+      test_provider_class = Class.new(described_class) do
+        def get_api_base
+          api_base
+        end
+        
+        def default_api_base
+          'https://default-api.example.com'
+        end
+      end
+      
+      provider = test_provider_class.new(api_base: 'https://custom-api.example.com')
+      expect(provider.get_api_base).to eq('https://custom-api.example.com')
     end
     
-    it 'returns the default api_base if not configured' do
-      # Skip this test since api_base is protected
-      skip "api_base is a protected method"
+    it 'uses the default api_base if not configured' do
+      # Create a test subclass that exposes the protected method
+      test_provider_class = Class.new(described_class) do
+        def get_api_base
+          api_base
+        end
+        
+        def default_api_base
+          'https://default-api.example.com'
+        end
+      end
+      
+      provider = test_provider_class.new
+      expect(provider.get_api_base).to eq('https://default-api.example.com')
     end
   end
   
-  describe '#provider_name' do
+  describe 'provider_name (indirectly)' do
     it 'returns the lowercase class name without namespace' do
-      # Skip this test since provider_name is protected
-      skip "provider_name is a protected method"
+      # Create a test subclass that exposes the protected method
+      test_provider_class = Class.new(described_class) do
+        def get_provider_name
+          provider_name
+        end
+      end
+      
+      # Set the class name
+      stub_const('RubyMCP::Providers::TestProvider', test_provider_class)
+      
+      provider = RubyMCP::Providers::TestProvider.new
+      expect(provider.get_provider_name).to eq('testprovider')
     end
   end
 end

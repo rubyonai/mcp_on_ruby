@@ -26,9 +26,18 @@ module RubyMCP
       storage.delete_context(context_id)
     end
 
-    def add_message(context_id, role, content)
-      message = RubyMCP::Models::Message.new(role: role, content: content)
+    def add_message(context_id, role, content, metadata: {})
+      message = RubyMCP::Models::Message.new(role: role, content: content, metadata: metadata)
       storage.add_message(context_id, message)
+    end
+    
+    def add_content(context_id, content_id = nil, content_data)
+      content_id ||= "cnt_#{SecureRandom.hex(10)}"
+      storage.add_content(context_id, content_id, content_data)
+    end
+    
+    def get_content(context_id, content_id)
+      storage.get_content(context_id, content_id)
     end
   end
 end

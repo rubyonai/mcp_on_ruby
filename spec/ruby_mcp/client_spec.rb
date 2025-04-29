@@ -70,5 +70,57 @@ RSpec.describe RubyMCP::Client do
       result = client.add_message(context_id, role, content)
       expect(result).to eq(message)
     end
+    
+    it 'handles messages with metadata' do
+      context_id = 'ctx_123'
+      role = 'user'
+      content = 'Hello with metadata'
+      metadata = { source: 'test' }
+      message = instance_double(RubyMCP::Models::Message)
+      
+      expect(RubyMCP::Models::Message).to receive(:new).with(role: role, content: content, metadata: metadata).and_return(message)
+      expect(storage).to receive(:add_message).with(context_id, message).and_return(message)
+      
+      # Update the client class to support metadata
+      result = client.add_message(context_id, role, content, metadata: metadata)
+      expect(result).to eq(message)
+    end
+  end
+  
+  describe '#add_content' do
+    it 'adds content to a context' do
+      context_id = 'ctx_123'
+      content_id = 'cnt_456'
+      content_data = { type: 'file', data: 'test content' }
+      
+      expect(storage).to receive(:add_content).with(context_id, content_id, content_data).and_return(content_id)
+      
+      result = client.add_content(context_id, content_id, content_data)
+      expect(result).to eq(content_id)
+    end
+    
+    it 'generates a content ID if not provided' do
+      context_id = 'ctx_123'
+      content_data = { type: 'file', data: 'test content' }
+      
+      expect(SecureRandom).to receive(:hex).with(10).and_return('random_hex')
+      expect(storage).to receive(:add_content).with(context_id, 'cnt_random_hex', content_data).and_return('cnt_random_hex')
+      
+      result = client.add_content(context_id, nil, content_data)
+      expect(result).to eq('cnt_random_hex')
+    end
+  end
+  
+  describe '#get_content' do
+    it 'retrieves content from a context' do
+      context_id = 'ctx_123'
+      content_id = 'cnt_456'
+      content_data = { type: 'file', data: 'test content' }
+      
+      expect(storage).to receive(:get_content).with(context_id, content_id).and_return(content_data)
+      
+      result = client.get_content(context_id, content_id)
+      expect(result).to eq(content_data)
+    end
   end
 end
