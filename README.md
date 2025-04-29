@@ -134,8 +134,30 @@ RubyMCP.configure do |config|
     }
   }
   
-  # Storage backend (:memory, :redis, :active_record, or custom)
+  # Storage backend
+  
+  # Option 1: Memory storage (default)
   config.storage = :memory
+  
+  # Option 2: Redis storage
+  config.storage = :redis
+  config.redis = {
+    url: ENV.fetch('REDIS_URL', 'redis://localhost:6379/0'),
+    namespace: 'my_app_mcp',
+    ttl: 86400 # 1 day in seconds
+  }
+  
+  # Option 3: ActiveRecord storage
+  config.storage = :active_record
+  config.active_record = {
+    # Connection settings (not needed in Rails)
+    connection: {
+      adapter: 'sqlite3',
+      database: 'db/mcp.sqlite3'
+    },
+    # Table prefix to avoid name collisions
+    table_prefix: 'mcp_'
+  }
   
   # Server settings
   config.server_port = 3000
@@ -334,7 +356,11 @@ RubyMCP.configure do |config|
   if Rails.env.development? || Rails.env.test?
     config.storage = :memory
   else
-    config.storage = :memory  # Replace with persistent option when implemented
+    # Use ActiveRecord for production (uses your Rails database)
+    config.storage = :active_record
+    config.active_record = {
+      table_prefix: "mcp_#{Rails.env}_"  # Environment-specific prefix
+    }
   end
   
   # Enable authentication in production
@@ -393,6 +419,43 @@ MCP on Ruby supports Redis as a persistent storage backend:
 
 For detailed integration examples, see the [[Redis Storage](https://github.com/nagstler/mcp_on_ruby/wiki/Redis-Storage)] wiki page.
 
+### ActiveRecord Storage
+
+For integration with Rails or any app needing database storage:
+
+```ruby
+# Add to Gemfile
+gem 'activerecord', '~> 6.1'
+gem 'sqlite3', '~> 1.4'  # or pg, mysql2, etc.
+
+# Configure RubyMCP
+RubyMCP.configure do |config|
+  config.storage = :active_record
+  config.active_record = {
+    # Connection (not needed in Rails)
+    connection: {
+      adapter: 'sqlite3',
+      database: 'db/mcp.sqlite3'
+    },
+    # Table prefix to avoid name collisions
+    table_prefix: 'mcp_'
+  }
+end
+```
+
+In Rails applications, it uses your app's database connection automatically:
+
+```ruby
+# config/initializers/ruby_mcp.rb
+RubyMCP.configure do |config|
+  config.storage = :active_record
+  config.active_record = {
+    table_prefix: "mcp_#{Rails.env}_"  # Environment-specific prefix
+  }
+end
+```
+
+The ActiveRecord adapter automatically creates the necessary tables with appropriate indexes, and handles different types of data (text, binary, JSON) appropriately.
 
 ### Custom storage 
 You can implement custom storage backends by extending the base storage class:
@@ -500,7 +563,7 @@ bundle exec ruby examples/simple_server/server.rb
 While RubyMCP is functional for basic use cases, there are several areas planned for improvement:
 
 - [x] Redis persistent storage backend
-- [ ] ActiveRecord storage backend
+- [x] ActiveRecord storage backend
 - [ ] Complete test coverage, including integration tests
 - [ ] Improved error handling and recovery strategies
 - [ ] Rate limiting for provider APIs
