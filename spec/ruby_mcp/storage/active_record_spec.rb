@@ -10,6 +10,47 @@ begin
 rescue LoadError
   ACTIVERECORD_AVAILABLE = false
   puts 'Skipping ActiveRecord tests because ActiveRecord is not available'
+  it 'handles concurrent access without data corruption' do
+    threads = []
+    10.times do |i|
+      threads << Thread.new do
+        ctx = RubyMCP::Models::Context.new(id: "ctx_concurrent_#{i}")
+        storage.create_context(ctx)
+      end
+    end
+    threads.each(&:join)
+
+    contexts = storage.list_contexts
+    expect(contexts.size).to eq(10)
+  end
+
+  it 'handles edge cases like empty strings and special characters' do
+    storage.create_context(context)
+
+    special_content_id = 'special_content'
+    special_content = "!@#$%^&*()_+{}|:\"<>?`~"
+    storage.add_content(context_id, special_content_id, special_content)
+
+    retrieved_content = storage.get_content(context_id, special_content_id)
+    expect(retrieved_content).to eq(special_content)
+  end
+
+  it 'raises errors for invalid data types' do
+    expect do
+      storage.add_content(context_id, 'invalid_content', Object.new)
+    end.to raise_error(RubyMCP::Errors::ContentError, /Invalid data type/)
+  end
+
+  it 'rolls back transactions on errors' do
+    storage.create_context(context)
+
+    expect do
+      ActiveRecord::Base.transaction do
+        storage.add_content(context_id, 'valid_content', 'Valid data')
+        raise ActiveRecord::Rollback
+      end
+    end.not_to change { storage.list_content(context_id).size }
+  end
 end
 
 RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
