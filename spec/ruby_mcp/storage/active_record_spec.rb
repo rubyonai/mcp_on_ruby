@@ -24,6 +24,15 @@ rescue LoadError
     expect(contexts.size).to eq(10)
   end
 
+  before(:each) do
+    @original_logger = RubyMCP.logger
+    RubyMCP.logger = Logger.new(nil) # Disable logging
+  end
+
+  after(:each) do
+    RubyMCP.logger = @original_logger # Restore original logger
+  end
+
   it 'handles edge cases like empty strings and special characters' do
     storage.create_context(context)
 
