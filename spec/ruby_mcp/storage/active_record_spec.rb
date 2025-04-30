@@ -10,6 +10,7 @@ begin
 rescue LoadError
   ACTIVERECORD_AVAILABLE = false
   puts 'Skipping ActiveRecord tests because ActiveRecord is not available'
+end
 RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
   let(:table_prefix) { "test_mcp_#{SecureRandom.hex(4)}_" }
   let(:options) { { table_prefix: table_prefix } }
