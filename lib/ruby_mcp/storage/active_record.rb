@@ -219,7 +219,10 @@ module RubyMCP
       # @raise [RubyMCP::Errors::ContentError] If content not found
       def get_content(context_id, content_id)
         ar_context = @context_model.find_by(external_id: context_id)
-        raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
+        unless ar_context
+          RubyMCP.logger&.error("Failed to retrieve context: Context with ID #{context_id} not found.")
+          raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}"
+        end
 
         ar_content = @content_model.find_by(context_id: ar_context.id, external_id: content_id)
         unless ar_content
