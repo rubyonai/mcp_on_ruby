@@ -39,7 +39,7 @@ The [Model Context Protocol](https://modelcontextprotocol.io) provides a standar
   - [Uploading Content](#uploading-content)
   - [Using Tool Calls](#using-tool-calls)
 - [🚄 Rails Integration](#-rails-integration)
-- [💾 Custom Storage Backend](#-storage-backends)
+- [💾 Storage Backend](#-storage-backends)
 - [🔒 Authentication](#-authentication)
 - [🛠️ Development](#️-development)
 - [🗺️ Roadmap](#️-roadmap)
@@ -113,6 +113,11 @@ ruby server.rb
 # Terminal 2: Run the client
 cd examples/simple_server
 ruby client.rb
+
+# ActiveRecord Storage Demo
+# Demonstrates database storage with SQLite
+cd examples/simple_server
+ruby activerecord_demo.rb
 ```
 
 This demo provides a guided tour of the MCP functionality, showing each step of creating contexts, adding messages, and generating responses with detailed explanations.
