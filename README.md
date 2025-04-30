@@ -8,15 +8,12 @@
 [![Test](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml/badge.svg)](https://github.com/nagstler/ruby_mcp/actions/workflows/test.yml)
 [![codecov](https://codecov.io/github/nagstler/ruby_mcp/graph/badge.svg?token=SG4EJEIHW3)](https://codecov.io/github/nagstler/ruby_mcp)
 
-<strong> 🚀 **Supercharge your Rails APIs**</strong> 
-<p>
-  Turn your Rails application into an MCP server with just a few lines of code.
-</p>
+<strong> **Turn your Rails APIs into an MCP server.**</strong> 
+
 </div>
 
 ## 🔍 Introduction
-
-The [Model Context Protocol](https://modelcontextprotocol.io) provides a standardized way for applications to interact with language models. Similar to how REST standardized web APIs, MCP creates a consistent interface for working with providers like OpenAI and Anthropic.
+The [Model Context Protocol](https://modelcontextprotocol.io) standardizes how applications interact with AI models, serving as the "REST for LLMs." **MCP on Ruby** brings this standard to the Ruby ecosystem. Create contexts, manage conversations, connect to multiple providers, and handle streaming responses with clean, Ruby code.
 
 ![System Component Flow (Horizontal)](https://github.com/user-attachments/assets/085ad9b8-bee0-4d60-a4b7-ecf02d07f53c)
 
