@@ -22,6 +22,12 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
   end
 
+  after(:all) do
+    ActiveRecord::Base.connection.drop_table(:contexts, if_exists: true)
+    ActiveRecord::Base.connection.drop_table(:messages, if_exists: true)
+    ActiveRecord::Base.connection.drop_table(:contents, if_exists: true)
+  end
+
   # Sample data for testing
   let(:context_id) { 'ctx_123456' }
   let(:context) do
@@ -44,7 +50,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
   let(:json_content) { { key1: 'value1', key2: [1, 2, 3] } }
 
   # Basic functionality tests
-  it 'creates, reads, updates, and deletes contexts' do
+  it 'successfully performs CRUD operations on contexts' do
     # Create a context
     storage.create_context(context)
 
@@ -70,7 +76,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     end.to raise_error(RubyMCP::Errors::ContextError)
   end
 
-  it 'works with messages' do
+  it 'handles message operations correctly' do
     # Create a context
     storage.create_context(context)
 
@@ -84,7 +90,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     expect(retrieved.messages.first.content).to eq('Hello, world!')
   end
 
-  it 'works with content' do
+  it 'manages different types of content accurately' do
     # Create a context
     storage.create_context(context)
 
@@ -116,7 +122,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     expect(retrieved_binary.b).to eq(binary_content.b) # Compare binary content
   end
 
-  it 'handles errors appropriately' do
+  it 'raises appropriate errors for invalid operations' do
     # Context not found error
     expect do
       storage.get_context('nonexistent')
@@ -150,7 +156,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     end.to raise_error(RubyMCP::Errors::ContentError, /Invalid JSON/)
   end
 
-  it 'lists contexts with pagination' do
+  it 'lists contexts with correct pagination' do
     # Create multiple contexts
     5.times do |i|
       ctx = RubyMCP::Models::Context.new(id: "ctx_test_#{i}")
@@ -171,7 +177,7 @@ RSpec.describe RubyMCP::Storage::ActiveRecord, if: ACTIVERECORD_AVAILABLE do
     expect(contexts.size).to eq(2)
   end
 
-  it 'lists all content for a context' do
+  it 'retrieves all content for a given context' do
     # Create a context
     storage.create_context(context)
 
