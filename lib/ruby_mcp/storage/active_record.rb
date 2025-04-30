@@ -22,6 +22,7 @@ module RubyMCP
       def initialize(options = {})
         super
         @table_prefix = options[:table_prefix] || 'mcp_'
+        @logger = options[:logger] || RubyMCP.logger
 
         # Set up ActiveRecord connection if provided
         ::ActiveRecord::Base.establish_connection(options[:connection]) if options[:connection].is_a?(Hash)
@@ -36,7 +37,7 @@ module RubyMCP
       def create_context(context)
         # Check if context already exists
         if @context_model.exists?(external_id: context.id)
-          raise RubyMCP::Errors::ContextError, "Cannot create context: Context with ID #{context.id} already exists."
+          raise RubyMCP::Errors::ContextError, "Context already exists: #{context.id}"
         end
 
         # Create the context record
@@ -66,16 +67,14 @@ module RubyMCP
       # @raise [RubyMCP::Errors::ContextError] If context not found
       def get_context(context_id)
         ar_context = @context_model.find_by(external_id: context_id)
-        unless ar_context
-          RubyMCP.logger&.error("Failed to retrieve context: Context with ID #{context_id} not found.")
-          raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}"
-        end
+        raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
 
         # Parse metadata
         metadata = begin
           json = JSON.parse(ar_context.metadata)
           symbolize_keys(json)
-        rescue StandardError
+        rescue JSON::ParserError => e
+          @logger.warn("Error parsing context metadata: #{e.message}")
           {}
         end
 
@@ -96,7 +95,8 @@ module RubyMCP
           msg_metadata = begin
             json = JSON.parse(ar_message.metadata)
             symbolize_keys(json)
-          rescue StandardError
+          rescue JSON::ParserError => e
+            @logger.warn("Error parsing message metadata: #{e.message}")
             {}
           end
 
@@ -115,8 +115,10 @@ module RubyMCP
         ar_contents.each do |ar_content|
           content_data = if ar_content.content_type == 'json'
                            begin
-                             JSON.parse(ar_content.data_json)
-                           rescue StandardError
+                             json = JSON.parse(ar_content.data_json)
+                             symbolize_keys(json)
+                           rescue JSON::ParserError => e
+                             @logger.warn("Error parsing content JSON: #{e.message}")
                              {}
                            end
                          else
@@ -174,6 +176,35 @@ module RubyMCP
         end
       end
 
+      # List all content for a context
+      # @param context_id [String] ID of the context
+      # @return [Hash] Map of content_id to content data
+      # @raise [RubyMCP::Errors::ContextError] If context not found
+      def list_content(context_id)
+        ar_context = @context_model.find_by(external_id: context_id)
+        raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
+
+        content_map = {}
+        ar_contents = @content_model.where(context_id: ar_context.id)
+
+        ar_contents.each do |ar_content|
+          content_data = if ar_content.content_type == 'json'
+                           begin
+                             json = JSON.parse(ar_content.data_json)
+                             symbolize_keys(json)
+                           rescue JSON::ParserError => e
+                             raise RubyMCP::Errors::ContentError,
+                                   "Invalid JSON in content #{ar_content.external_id}: #{e.message}"
+                           end
+                         else
+                           ar_content.data_binary
+                         end
+          content_map[ar_content.external_id] = content_data
+        end
+
+        content_map
+      end
+
       # Add a message to a context
       # @param context_id [String] ID of the context
       # @param message [RubyMCP::Models::Message] Message to add
@@ -219,48 +250,21 @@ module RubyMCP
       # @raise [RubyMCP::Errors::ContentError] If content not found
       def get_content(context_id, content_id)
         ar_context = @context_model.find_by(external_id: context_id)
-        unless ar_context
-          RubyMCP.logger&.error("Failed to retrieve context: Context with ID #{context_id} not found.")
-          raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}"
-        end
+        raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
 
         ar_content = @content_model.find_by(context_id: ar_context.id, external_id: content_id)
-        unless ar_content
-          RubyMCP.logger&.error("Failed to retrieve content: Content with ID #{content_id} not found in context #{context_id}.")
-          raise RubyMCP::Errors::ContentError, "Content not found: #{content_id}"
-        end
+        raise RubyMCP::Errors::ContentError, "Content not found: #{content_id}" unless ar_content
 
         if ar_content.content_type == 'json'
           begin
             json = JSON.parse(ar_content.data_json)
             symbolize_keys(json)
           rescue JSON::ParserError => e
-            raise RubyMCP::Errors::ContentError, "Invalid JSON content: #{e.message}"
-          rescue StandardError
-            {}
+            raise RubyMCP::Errors::ContentError, "Invalid JSON in content #{content_id}: #{e.message}"
           end
         else
           ar_content.data_binary
         end
-      end
-
-      # List all content for a context
-      # @param context_id [String] ID of the context
-      # @return [Hash<String, Object>] Map of content IDs to content data
-      # @raise [RubyMCP::Errors::ContextError] If context not found
-      def list_content(context_id)
-        ar_context = @context_model.find_by(external_id: context_id)
-        raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
-
-        content_map = {}
-        ar_contents = @content_model.where(context_id: ar_context.id)
-
-        ar_contents.each do |ar_content|
-          content_id = ar_content.external_id
-          content_map[content_id] = get_content(context_id, content_id)
-        end
-
-        content_map
       end
 
       private
@@ -293,24 +297,21 @@ module RubyMCP
         connection = ::ActiveRecord::Base.connection
 
         # Drop tables if they exist (for clean setup)
-        # Use ActiveRecord's built-in table_exists? method with proper error handling
-        begin
-          %w[contents messages contexts].each do |table|
-            table_name = "#{@table_prefix}#{table}"
-            if connection.table_exists?(table_name)
-              RubyMCP.logger&.info("Dropping existing table: #{table_name}")
-              connection.drop_table(table_name)
-            end
-          end
-        rescue StandardError => e
-          # Log the error but continue - this handles edge cases with certain DB adapters
-          RubyMCP.logger&.warn("Error checking/dropping tables: #{e.message}")
-        end
+        connection.drop_table("#{@table_prefix}contents") if connection.table_exists?("#{@table_prefix}contents")
+
+        connection.drop_table("#{@table_prefix}messages") if connection.table_exists?("#{@table_prefix}messages")
+
+        connection.drop_table("#{@table_prefix}contexts") if connection.table_exists?("#{@table_prefix}contexts")
 
         # Create tables in proper order
         create_contexts_table
         create_messages_table
         create_contents_table
+      end
+
+      # Check if a table exists
+      def table_exists?(table_name)
+        ::ActiveRecord::Base.connection.table_exists?(table_name)
       end
 
       # Create the contexts table
@@ -369,6 +370,15 @@ module RubyMCP
 
       # Create a content record
       def create_content_record(context_id, content_id, content_data)
+        # Validate data type first
+        unless content_data.is_a?(String) || content_data.is_a?(Hash) ||
+               content_data.is_a?(Array) || content_data.is_a?(Numeric) ||
+               content_data.is_a?(TrueClass) || content_data.is_a?(FalseClass) ||
+               content_data.is_a?(NilClass)
+          raise RubyMCP::Errors::ContentError,
+                "Invalid data type: #{content_data.class.name}. Must be String, Hash, Array, Numeric, Boolean, or nil."
+        end
+
         if content_data.is_a?(Hash) || content_data.is_a?(Array)
           @content_model.create!(
             context_id: context_id,
@@ -377,15 +387,10 @@ module RubyMCP
             content_type: 'json'
           )
         else
-          # Ensure binary data is properly stored
-          binary_data = content_data.to_s
-          # Force binary encoding if it's not already
-          binary_data = binary_data.b unless binary_data.encoding == Encoding::ASCII_8BIT
-
           @content_model.create!(
             context_id: context_id,
             external_id: content_id,
-            data_binary: binary_data,
+            data_binary: content_data.to_s,
             content_type: 'binary'
           )
         end
@@ -395,7 +400,9 @@ module RubyMCP
       def symbolize_keys(obj)
         case obj
         when Hash
-          obj.transform_keys(&:to_sym).transform_values { |v| symbolize_keys(v) }
+          obj.each_with_object({}) do |(key, value), result|
+            result[key.to_sym] = symbolize_keys(value)
+          end
         when Array
           obj.map { |item| symbolize_keys(item) }
         else
