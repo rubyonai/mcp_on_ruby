@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0] - 2023-05-01
+
+### Added
+- ActiveRecord storage backend for database persistence
+- Support for Rails integration with ActiveRecord storage
+- Auto-creation of database tables with configurable prefixes
+- Proper handling of different data types (text, binary, JSON)
+- Symbolization of hash keys for consistent API
+- Comprehensive test suite for ActiveRecord storage
+
+### Changed
+- Enhanced `StorageFactory` to support ActiveRecord backend
+- Updated configuration system with ActiveRecord options
+- Improved documentation with ActiveRecord storage examples
+
 ## [0.2.0] - 2025-04-21
 
 ### Added

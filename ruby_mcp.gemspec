@@ -27,29 +27,31 @@ Gem::Specification.new do |spec|
   spec.metadata['rubygems_mfa_required'] = 'true'
 
   # Dependencies
+  spec.add_dependency 'concurrent-ruby', '~> 1.2'
+  spec.add_dependency 'dry-schema', '~> 1.13'
   spec.add_dependency 'faraday', '~> 2.7'
   spec.add_dependency 'faraday-net_http', '~> 3.0'
   spec.add_dependency 'jwt', '~> 2.7'
-  # spec.add_dependency "json-schema", "~> 4.0"
-  spec.add_dependency 'concurrent-ruby', '~> 1.2'
-  spec.add_dependency 'dry-schema', '~> 1.13'
-  spec.add_dependency 'webrick', '~> 1.7'
-
   spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'rack-cors', '~> 1.1'
-  spec.add_dependency 'redis', '~> 5.0'
+  spec.add_dependency 'webrick', '~> 1.7'
+
+  # Optional dependencies - add as development dependencies
+  # Redis is optional for Redis storage
+  spec.add_development_dependency 'redis', '~> 5.0'
+  # ActiveRecord is optional for ActiveRecord storage
+  spec.add_development_dependency 'activerecord', '~> 6.1'
+  spec.add_development_dependency 'sqlite3', '~> 1.4'
 
   # Development dependencies
-  spec.add_development_dependency 'vcr', '~> 6.1'
-  spec.add_development_dependency 'webmock', '~> 3.18'
-
   spec.add_development_dependency 'codecov', '~> 0.6.0'
   spec.add_development_dependency 'rack-test', '~> 2.1'
   spec.add_development_dependency 'simplecov', '~> 0.21.2'
   spec.add_development_dependency 'simplecov-cobertura', '~> 2.1'
+  spec.add_development_dependency 'vcr', '~> 6.1'
+  spec.add_development_dependency 'webmock', '~> 3.18'
 
   # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files = Dir.chdir(__dir__) do
     # Use Dir.glob for files that actually exist, rather than git ls-files
     Dir.glob('lib/**/*') +
@@ -64,10 +66,4 @@ Gem::Specification.new do |spec|
   spec.bindir = 'exe'
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
-
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
-
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
 end
