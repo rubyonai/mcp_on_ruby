@@ -36,7 +36,7 @@ module RubyMCP
       def create_context(context)
         # Check if context already exists
         if @context_model.exists?(external_id: context.id)
-          raise RubyMCP::Errors::ContextError, "Context already exists: #{context.id}"
+          raise RubyMCP::Errors::ContextError, "Cannot create context: Context with ID #{context.id} already exists."
         end
 
         # Create the context record
@@ -66,7 +66,10 @@ module RubyMCP
       # @raise [RubyMCP::Errors::ContextError] If context not found
       def get_context(context_id)
         ar_context = @context_model.find_by(external_id: context_id)
-        raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
+        unless ar_context
+          RubyMCP.logger&.error("Failed to retrieve context: Context with ID #{context_id} not found.")
+          raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}"
+        end
 
         # Parse metadata
         metadata = begin
@@ -219,7 +222,10 @@ module RubyMCP
         raise RubyMCP::Errors::ContextError, "Context not found: #{context_id}" unless ar_context
 
         ar_content = @content_model.find_by(context_id: ar_context.id, external_id: content_id)
-        raise RubyMCP::Errors::ContentError, "Content not found: #{content_id}" unless ar_content
+        unless ar_content
+          RubyMCP.logger&.error("Failed to retrieve content: Content with ID #{content_id} not found in context #{context_id}.")
+          raise RubyMCP::Errors::ContentError, "Content not found: #{content_id}"
+        end
 
         if ar_content.content_type == 'json'
           begin
@@ -286,9 +292,13 @@ module RubyMCP
         # Drop tables if they exist (for clean setup)
         # Use ActiveRecord's built-in table_exists? method with proper error handling
         begin
-          connection.drop_table("#{@table_prefix}contents") if connection.table_exists?("#{@table_prefix}contents")
-          connection.drop_table("#{@table_prefix}messages") if connection.table_exists?("#{@table_prefix}messages")
-          connection.drop_table("#{@table_prefix}contexts") if connection.table_exists?("#{@table_prefix}contexts")
+          %w[contents messages contexts].each do |table|
+            table_name = "#{@table_prefix}#{table}"
+            if connection.table_exists?(table_name)
+              RubyMCP.logger&.info("Dropping existing table: #{table_name}")
+              connection.drop_table(table_name)
+            end
+          end
         rescue StandardError => e
           # Log the error but continue - this handles edge cases with certain DB adapters
           RubyMCP.logger&.warn("Error checking/dropping tables: #{e.message}")
