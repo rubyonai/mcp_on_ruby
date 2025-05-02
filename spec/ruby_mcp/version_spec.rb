@@ -19,7 +19,7 @@ RSpec.describe RubyMCP do
     it 'is referenced in the gemspec' do
       gemspec_path = File.expand_path('../../ruby_mcp.gemspec', __dir__)
       gemspec_content = File.read(gemspec_path)
-      
+
       # Check that gemspec uses the VERSION constant
       expect(gemspec_content).to include('spec.version = RubyMCP::VERSION')
     end
