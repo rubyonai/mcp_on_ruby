@@ -16,14 +16,12 @@ RSpec.describe RubyMCP do
       expect(RubyMCP::VERSION).to match(/^\d+\.\d+\.\d+$/)
     end
 
-    it 'matches the version in the gemspec' do
+    it 'is referenced in the gemspec' do
       gemspec_path = File.expand_path('../../ruby_mcp.gemspec', __dir__)
       gemspec_content = File.read(gemspec_path)
       
-      # Extract version from gemspec
-      gemspec_version = gemspec_content.match(/spec\.version\s*=\s*["'](.+?)["']/)[1]
-      
-      expect(RubyMCP::VERSION).to eq(gemspec_version)
+      # Check that gemspec uses the VERSION constant
+      expect(gemspec_content).to include('spec.version = RubyMCP::VERSION')
     end
   end
 end
