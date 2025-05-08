@@ -10,4 +10,4 @@
 *.gem
 .rspec_status
 .DS_Store
-Gemfile.lock
+Gemfile.lockfastmcp/

@@ -1,19 +1,61 @@
 # frozen_string_literal: true
 
-module RubyMCP
-  class Configuration
-    attr_accessor :log_level, :transport, :port, :host
-    attr_accessor :auth_enabled, :auth_method, :oauth_config
-    attr_accessor :default_timeout
+require 'logger'
 
+module MCP
+  # Configuration options for MCP
+  class Configuration
+    # Server options
+    attr_accessor :server_port, :server_host
+    attr_accessor :server_transport
+    
+    # Client options
+    attr_accessor :client_transport, :client_url
+    
+    # Common options
+    attr_accessor :log_level
+    attr_accessor :auth_enabled, :auth_method, :auth_options
+    attr_accessor :default_timeout
+    
+    # Initialize with default values
     def initialize
+      # Server defaults
+      @server_port = 3000
+      @server_host = '0.0.0.0'
+      @server_transport = :http
+      
+      # Client defaults
+      @client_transport = :http
+      @client_url = 'http://localhost:3000/mcp'
+      
+      # Common defaults
       @log_level = Logger::INFO
-      @transport = :http
-      @port = 3000
-      @host = '0.0.0.0'
       @auth_enabled = false
       @auth_method = :none
+      @auth_options = {}
       @default_timeout = 30 # seconds
+    end
+    
+    # Get the transport options for server
+    # @return [Hash] The transport options
+    def server_transport_options
+      {
+        transport: @server_transport,
+        port: @server_port,
+        host: @server_host,
+        log_level: @log_level
+      }
+    end
+    
+    # Get the transport options for client
+    # @return [Hash] The transport options
+    def client_transport_options
+      {
+        transport: @client_transport,
+        url: @client_url,
+        log_level: @log_level,
+        timeout: @default_timeout
+      }
     end
   end
 end

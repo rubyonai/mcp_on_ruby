@@ -101,6 +101,32 @@ puts profile.inspect
 client.disconnect
 ```
 
+## MCP Implementation
+
+This library is an implementation of the Model Context Protocol specification:
+
+### 1. Server Framework
+- **JSON-RPC 2.0 interface**
+- **Bidirectional communication** support
+- **Connection/session management**
+
+### 2. Four Capability Types
+- **Tools**: Model-controlled functions with JSON Schema-defined parameters
+- **Resources**: Application-controlled data sources models can access
+- **Prompts**: Interactive templates requiring user input
+- **Roots**: File system access points with appropriate permissions
+
+### 3. Method Handlers
+- `tools/list` - Returns available tools
+- `tools/call` - Executes a specific tool
+- `resources/list` - Returns available resources
+- `resources/get` - Retrieves data from a resource
+- `prompts/list` - Returns available prompts
+- `prompts/show` - Displays a prompt template
+- `roots/list` - Returns available filesystem roots
+- `roots/read` - Reads files from a root directory
+- ...and all other required MCP methods
+
 ## Architecture
 
 MCP on Ruby follows the MCP specification's architecture:
