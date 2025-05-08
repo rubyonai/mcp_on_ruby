@@ -3,6 +3,8 @@
 require_relative 'client/client'
 require_relative 'client/retry'
 require_relative 'client/streaming'
+require_relative 'client/sampling'
+require_relative 'client/roots'
 
 module MCP
   # Creates a new client instance with optional block configuration
@@ -15,6 +17,8 @@ module MCP
     # Add additional capabilities
     client.extend(Client::Retry)
     client.extend(Client::Streaming)
+    client.extend(Client::Sampling)
+    client.extend(Client::Roots)
     
     yield client if block_given?
     client
@@ -28,6 +32,10 @@ module MCP
     # @return [self] The client instance
     def initialize(options = {})
       @client = MCP.Client(options)
+      
+      # Set up roots and sampling handlers if provided
+      @client.set_roots(options[:roots]) if options[:roots]
+      @client.set_sampling_handler(options[:sampling_handler]) if options[:sampling_handler]
       
       yield self if block_given?
       
@@ -54,7 +62,7 @@ module MCP
       @client.connected?
     end
     
-    # Get the list of available tools
+    # List available tools on the server
     # @return [Array<Hash>] The list of available tools
     def list_tools
       @client.list_tools
@@ -85,6 +93,74 @@ module MCP
     # @return [Object] The result of the block
     def with_retry(options = {}, retriable_errors = [StandardError], retry_condition = nil, &block)
       @client.with_retry(options, retriable_errors, retry_condition, &block)
+    end
+    
+    # List available resources on the server
+    # @return [Array<Hash>] The list of available resources
+    def list_resources
+      @client.list_resources
+    end
+    
+    # List available resource templates on the server
+    # @return [Array<Hash>] The list of available resource templates
+    def list_resource_templates
+      @client.list_resource_templates
+    end
+    
+    # Read a resource from the server
+    # @param uri [String] The URI of the resource to read
+    # @param params [Hash] Optional parameters for template resources
+    # @return [Array<Hash>] The resource content
+    def read_resource(uri, params = nil)
+      @client.read_resource(uri, params)
+    end
+    
+    # List available prompts on the server
+    # @return [Array<Hash>] The list of available prompts
+    def list_prompts
+      @client.list_prompts
+    end
+    
+    # Get a prompt from the server
+    # @param name [String] The name of the prompt to get
+    # @param arguments [Hash] Optional arguments for the prompt
+    # @return [Array<Hash>] The prompt messages
+    def get_prompt(name, arguments = {})
+      @client.get_prompt(name, arguments)
+    end
+    
+    # List available roots on the server
+    # @return [Array<Hash>] The list of available roots
+    def list_roots
+      @client.list_roots
+    end
+    
+    # Read a file from a root on the server
+    # @param root [String] The name of the root to read from
+    # @param path [String] The path to read
+    # @return [String] The file content
+    def read_root_file(root, path)
+      @client.read_root_file(root, path)
+    end
+    
+    # Allow models to call their host model for text generation
+    # @param prompt [String, Array<Hash>] The prompt to generate from
+    # @param options [Hash] Generation options
+    # @return [String] The generated text
+    def sample(prompt, options = {})
+      @client.sample(prompt, options)
+    end
+    
+    # Set the roots list handler
+    # @param roots [Array<Hash>] The roots to register
+    def set_roots(roots)
+      @client.set_roots(roots)
+    end
+    
+    # Set the sampling handler
+    # @param handler [Proc] The handler function
+    def set_sampling_handler(handler)
+      @client.set_sampling_handler(handler)
     end
     
     # Forward other methods to the client instance

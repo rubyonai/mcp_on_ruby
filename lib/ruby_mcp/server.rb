@@ -2,6 +2,12 @@
 
 require_relative 'server/tools/tool'
 require_relative 'server/tools/manager'
+require_relative 'server/resources/resource'
+require_relative 'server/resources/manager'
+require_relative 'server/prompts/prompt'
+require_relative 'server/prompts/manager'
+require_relative 'server/roots/root'
+require_relative 'server/roots/manager'
 require_relative 'server/dsl'
 require_relative 'server/server'
 
