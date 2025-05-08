@@ -4,8 +4,8 @@ require_relative 'lib/ruby_mcp/version'
 
 Gem::Specification.new do |spec|
   spec.name = 'mcp_on_ruby'
-  spec.version = RubyMCP::VERSION
-  spec.authors = ['Nagendra Kamath']
+  spec.version = MCP::VERSION
+  spec.authors = ['Nagendra Dhanakeerthi']
   spec.email = ['your-email@example.com']
 
   spec.summary = 'Ruby implementation of the Model Context Protocol (MCP)'
@@ -25,15 +25,17 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'concurrent-ruby', '~> 1.2'
   spec.add_dependency 'faye-websocket', '~> 0.11'
-  spec.add_dependency 'json-schema', '~> 4.0'
+  spec.add_dependency 'json-schema', '~> 3.0'
   spec.add_dependency 'jwt', '~> 2.7'
-  spec.add_dependency 'oauth2', '~> 2.0'
-  spec.add_dependency 'rack', '~> 3.0'
+  spec.add_dependency 'oauth2', '~> 1.4'
+  spec.add_dependency 'rack', '~> 2.2'
   spec.add_dependency 'securerandom', '~> 0.2'
+  spec.add_dependency 'webrick', '~> 1.7'
 
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.12'
   spec.add_development_dependency 'rubocop', '~> 1.50'
   spec.add_development_dependency 'simplecov', '~> 0.22'
   spec.add_development_dependency 'webmock', '~> 3.18'
+  spec.add_development_dependency 'rack-test', '~> 2.1'
 end

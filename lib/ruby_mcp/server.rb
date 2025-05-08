@@ -13,6 +13,11 @@ require_relative 'server/dsl'
 require_relative 'server/server'
 
 module MCP
+  # Module for MCP server implementation
+  module Server
+    # Module functions for server creation
+  end
+
   # Creates a new server instance with optional block configuration
   # @param options [Hash] Server options
   # @yield [Server::Server] The server instance
@@ -36,8 +41,16 @@ module MCP
     server
   end
   
-  # Main server class for MCP
-  class Server
+  # Create a new server instance
+  # @param options [Hash] The server options
+  # @return [ServerWrapper] A server instance
+  def self.server(options = {})
+    ServerWrapper.new(options)
+  end
+
+  # Wrapper class that delegates to the underlying server
+  # This avoids the naming conflict with MCP::Server module
+  class ServerWrapper
     # Create a new server instance
     # @param options [Hash] Server options
     # @yield [self] The server instance

@@ -8,6 +8,11 @@ require_relative 'client/roots'
 require_relative 'client/auth'
 
 module MCP
+  # Module for MCP client implementation
+  module Client
+    # Module functions for client creation
+  end
+
   # Creates a new client instance with optional block configuration
   # @param options [Hash] Client options
   # @yield [Client::Client] The client instance
@@ -36,8 +41,16 @@ module MCP
     client
   end
   
-  # Main client class for MCP
-  class Client
+  # Create a new client instance
+  # @param options [Hash] The client options
+  # @return [ClientWrapper] A client instance
+  def self.client(options = {})
+    ClientWrapper.new(options)
+  end
+
+  # Wrapper class that delegates to the underlying client
+  # This avoids the naming conflict with MCP::Client module
+  class ClientWrapper
     # Create a new client instance
     # @param options [Hash] Client options
     # @yield [self] The client instance

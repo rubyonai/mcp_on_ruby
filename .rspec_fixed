@@ -1,0 +1,4 @@
+--require spec_helper
+--format documentation
+--color
+--pattern "spec/unit/protocol/fixed/**/*_spec.rb,spec/unit/client/fixed/**/*_spec.rb,spec/unit/server/fixed/**/*_spec.rb,spec/debug_spec.rb"

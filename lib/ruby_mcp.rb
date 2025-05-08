@@ -7,6 +7,8 @@ require 'securerandom'
 require_relative 'ruby_mcp/version'
 require_relative 'ruby_mcp/errors'
 require_relative 'ruby_mcp/protocol'
+require_relative 'ruby_mcp/client'
+require_relative 'ruby_mcp/server'
 
 # The Model Context Protocol (MCP) implementation
 module MCP
@@ -31,24 +33,11 @@ module MCP
         log.level = configuration&.log_level || Logger::INFO
       end
     end
-
-    # Create a new server instance
-    # @param options [Hash] The server options
-    # @return [Server] A server instance
-    def server(options = {})
-      require_relative 'ruby_mcp/server'
-      Server.new(options)
-    end
-
-    # Create a new client instance
-    # @param options [Hash] The client options
-    # @return [Client] A client instance
-    def client(options = {})
-      require_relative 'ruby_mcp/client'
-      Client.new(options)
-    end
   end
 end
 
 # Load configuration
 require_relative 'ruby_mcp/configuration'
+
+# Load module aliases to ensure consistent module access patterns
+require_relative 'ruby_mcp/module_aliases'

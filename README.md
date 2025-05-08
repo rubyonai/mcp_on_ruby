@@ -4,61 +4,80 @@
 
 [![Gem Version](https://badge.fury.io/rb/mcp_on_ruby.svg)](https://badge.fury.io/rb/mcp_on_ruby)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Ruby Version](https://img.shields.io/badge/Ruby-3.0%2B-red.svg)](https://www.ruby-lang.org/)
+[![Build Status](https://github.com/nagstler/mcp_on_ruby/actions/workflows/ci.yml/badge.svg)](https://github.com/nagstler/mcp_on_ruby/actions)
 
-<strong>Ruby implementation of the Model Context Protocol (MCP) specification</strong>
+A Ruby implementation of the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) specification, enabling standardized AI application interactions with external tools and data sources.
+
+[Documentation](https://rubydoc.info/gems/mcp_on_ruby) | [Examples](/examples) | [Contributing](#contributing)
+
 </div>
 
-## Overview
+## 📋 Table of Contents
 
-The [Model Context Protocol](https://modelcontextprotocol.io) provides a standardized way for AI applications to interact with external tools and data sources. This library implements the MCP specification in Ruby, allowing developers to create both MCP servers and clients.
+- [Features](#-features)
+- [Installation](#-installation)
+- [Quick Start](#-quick-start)
+  - [Server Setup](#server-setup)
+  - [Client Setup](#client-setup)
+- [Core Concepts](#-core-concepts)
+- [Security](#-security)
+- [Advanced Usage](#-advanced-usage)
+- [Development](#-development)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## Features
+## ✨ Features
 
-- **Full MCP 2025-03-26 Protocol Support**: Implements the latest MCP specification
-- **JSON-RPC 2.0 Communication**: Bidirectional messaging using the JSON-RPC standard
-- **Transport Options**: HTTP and STDIO transports for maximum flexibility
-- **Server Capabilities**: 
-  - Tools (model-controlled actions)
-  - Resources (application-controlled context)
-  - Prompts (user-controlled interactions)
-  - Roots (filesystem integration)
-- **Client Integration**: Connect to any MCP-compatible server
-- **OAuth 2.1 Authentication**: Secure access to remote servers
-- **Streaming Support**: Real-time bidirectional communication
+- **Full MCP Protocol Support** - Implements the latest MCP specification
+- **Multiple Transport Options** - HTTP and STDIO transports
+- **Comprehensive Capabilities**
+  - 🛠️ Tools (model-controlled actions)
+  - 📚 Resources (application-controlled context)
+  - 💬 Prompts (user-controlled interactions)
+  - 📁 Roots (filesystem integration)
+- **Security First**
+  - OAuth 2.1 Authentication
+  - JWT Implementation
+  - Scope-based Authorization
+- **Real-time Communication**
+  - Bidirectional messaging
+  - Streaming support
+  - JSON-RPC 2.0 standard
 
-## Installation
+## 🚀 Installation
 
-Add this line to your application's Gemfile:
+Add to your `Gemfile`:
 
 ```ruby
 gem 'mcp_on_ruby'
 ```
 
-And then execute:
+Then run:
 
-```
-$ bundle install
-```
-
-Or install it yourself as:
-
-```
-$ gem install mcp_on_ruby
+```bash
+bundle install
 ```
 
-## Quick Start: Server
+Or install directly:
 
-Create a simple MCP server with tools:
+```bash
+gem install mcp_on_ruby
+```
+
+## 🏁 Quick Start
+
+### Server Setup
+
+Create a basic MCP server with tools:
 
 ```ruby
 require 'mcp_on_ruby'
 
-# Create a server with tools
 server = MCP::Server.new do |s|
   # Define a tool
   s.tool "weather.get_forecast" do |params|
     location = params[:location]
-    # ... fetch weather data ...
     { forecast: "Sunny", temperature: 72, location: location }
   end
   
@@ -68,36 +87,34 @@ server = MCP::Server.new do |s|
   end
 end
 
-# Start the server
 server.start
 ```
 
-### Authenticated Server
+### Client Setup
 
-Create a server with OAuth 2.1 authentication:
+Connect to an MCP server:
 
 ```ruby
 require 'mcp_on_ruby'
 
-# Create the OAuth provider
-oauth_provider = MCP::Server::Auth::OAuth.new(
-  client_id: 'your-client-id',
-  client_secret: 'your-client-secret',
-  token_expiry: 3600,
-  jwt_secret: 'your-jwt-secret',
-  issuer: 'your-server'
+client = MCP::Client.new(url: "http://localhost:3000")
+client.connect
+
+# List available tools
+tools = client.tools.list
+
+# Call a tool
+result = client.tools.call("weather.get_forecast", 
+  { location: "San Francisco" }
 )
+```
 
-# Create the permissions manager
-permissions = MCP::Server::Auth::Permissions.new
-permissions.add_method('tools/list', ['tools:read'])
-permissions.add_method('tools/call', ['tools:call'])
+## 🎯 Core Concepts
 
-# Create server with authentication
-server = MCP::Server.new
-server.set_auth_provider(oauth_provider, permissions)
+### 1. Tools
+Model-controlled functions with JSON Schema-defined parameters:
 
-# Define tools
+```ruby
 server.tools.define('example') do
   parameter :name, :string
   
@@ -105,152 +122,86 @@ server.tools.define('example') do
     "Hello, #{params[:name]}!"
   end
 end
-
-# Start the server
-server.start
 ```
 
-## Quick Start: Client
-
-Connect to an MCP server and use its tools:
+### 2. Resources
+Application-controlled data sources:
 
 ```ruby
-require 'mcp_on_ruby'
-
-# Create a client
-client = MCP::Client.new(url: "http://localhost:3000")
-
-# Connect to the server
-client.connect
-
-# List available tools
-tools = client.tools.list
-puts tools
-
-# Call a tool
-result = client.tools.call("weather.get_forecast", { location: "San Francisco" })
-puts result.inspect
-
-# Get a resource
-profile = client.resources.get("user.profile")
-puts profile.inspect
-
-# Disconnect
-client.disconnect
+server.resource "user.profile" do
+  { name: "John", email: "john@example.com" }
+end
 ```
 
-### Authenticated Client
-
-Connect to an authenticated MCP server:
+### 3. Authentication
+Secure your server with OAuth 2.1:
 
 ```ruby
-require 'mcp_on_ruby'
-
-# Create the client
-client = MCP::Client.new(url: "http://localhost:3000/mcp")
-
-# Set up OAuth credentials
-client.set_oauth_credentials(
+oauth_provider = MCP::Server::Auth::OAuth.new(
   client_id: 'your-client-id',
   client_secret: 'your-client-secret',
-  site: 'http://localhost:3000',
-  authorize_url: '/oauth/authorize',
-  token_url: '/oauth/token',
-  scopes: ['tools:read', 'tools:call'],
-  auto_refresh: true
+  token_expiry: 3600,
+  jwt_secret: 'your-jwt-secret',
+  issuer: 'your-server'
 )
-
-# Exchange authorization code for token (after user authorization)
-token = client.exchange_code('authorization_code')
-
-# Or set token directly
-client.set_access_token('your-access-token')
-
-# Connect and use tools with authentication
-client.connect
-results = client.tools.call('example', { name: 'World' })
 ```
 
-## MCP Implementation
+## 🔒 Security
 
-This library is an implementation of the Model Context Protocol specification:
-
-### 1. Server Framework
-- **JSON-RPC 2.0 interface**
-- **Bidirectional communication** support
-- **Connection/session management**
-
-### 2. Four Capability Types
-- **Tools**: Model-controlled functions with JSON Schema-defined parameters
-- **Resources**: Application-controlled data sources models can access
-- **Prompts**: Interactive templates requiring user input
-- **Roots**: File system access points with appropriate permissions
-
-### 3. Method Handlers
-- `tools/list` - Returns available tools
-- `tools/call` - Executes a specific tool
-- `resources/list` - Returns available resources
-- `resources/get` - Retrieves data from a resource
-- `prompts/list` - Returns available prompts
-- `prompts/show` - Displays a prompt template
-- `roots/list` - Returns available filesystem roots
-- `roots/read` - Reads files from a root directory
-- ...and all other required MCP methods
-
-## Architecture
-
-MCP on Ruby follows the MCP specification's architecture:
-
-1. **Protocol Layer**: JSON-RPC 2.0 communication over multiple transports
-2. **Server**: Exposes tools, resources, prompts, and roots to clients
-3. **Client**: Connects to servers and uses their capabilities
-4. **Authentication**: OAuth 2.1 for secure remote connections
-
-## Security Features
-
-### OAuth 2.1 Authentication
-
-MCP on Ruby supports secure authentication with OAuth 2.1:
-
-- **Token-based Authentication**: Industry-standard OAuth 2.1 flow
-- **JWT Implementation**: Secure token validation and management
-- **Automatic Token Refresh**: Seamless handling of token expiration
-- **Scope-based Authorization**: Fine-grained access control for MCP methods
+### OAuth 2.1 Implementation
+- Token-based authentication
+- JWT validation
+- Automatic token refresh
+- Scope-based authorization
 
 ### Permission Management
+- Method-level permissions
+- Scope requirements
+- Middleware architecture
 
-- **Method-level Permissions**: Control access to individual MCP methods
-- **Scope Requirements**: Define required scopes for each method
-- **Integration with OAuth**: Leverage OAuth scopes for authorization decisions
-- **Middleware Architecture**: Apply permissions consistently across all requests
+## 📚 Advanced Usage
 
-## Advanced Usage
+Check out our [examples directory](/examples) for complete implementations:
 
-See the [wiki](https://github.com/nagstler/mcp_on_ruby/wiki) for advanced usage, including:
+- [Simple Server](/examples/simple_server.rb)
+- [Authentication](/examples/authentication.rb)
+- [Rails Integration](/examples/rails_integration.rb)
+- [Streaming](/examples/streaming.rb)
 
-- Creating complex tool hierarchies
-- Implementing custom OAuth providers
-- Configuring method-level permissions
-- Token management and refresh strategies
-- Streaming responses
-- Working with resources and prompts
-- File system integration with roots
+For more advanced topics, visit our [Wiki](https://github.com/nagstler/mcp_on_ruby/wiki).
 
-Check out the `/examples` directory for complete working examples:
+## 💻 Development
 
-- **Simple Server** - Basic MCP server implementation
-- **Authentication** - OAuth 2.1 integration example
-- **Rails Integration** - Using MCP with Rails
-- **Streaming** - Real-time bidirectional communication
+```bash
+# Clone the repository
+git clone https://github.com/nagstler/mcp_on_ruby.git
 
-## Development
+# Install dependencies
+bundle install
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+# Run tests
+bundle exec rspec
 
-## Contributing
+# Start console
+bundle exec bin/console
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/nagstler/mcp_on_ruby.
+## 🤝 Contributing
 
-## License
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
+
+---
+
+<div align="center">
+Made with ❤️ for the Ruby community
+</div>
