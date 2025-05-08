@@ -6,6 +6,7 @@ require 'json'
 require 'securerandom'
 require 'faye/websocket'
 require 'eventmachine'
+require 'rack'
 
 module MCP
   module Protocol
@@ -23,6 +24,14 @@ module MCP
           @response_handlers = {}
           @event_handlers = {}
           @connection_id = nil
+          
+          # Authentication components
+          @auth_provider = options[:auth_provider]
+          @permissions = options[:permissions]
+          @auth_token = options[:auth_token]
+          
+          # Add auth token to headers if provided
+          add_auth_header if @auth_token
         end
 
         # Connect to the MCP endpoint
@@ -88,8 +97,63 @@ module MCP
         def on_event(event_type, &block)
           @event_handlers[event_type] = block
         end
+        
+        # Set authentication provider and permissions
+        # @param auth_provider [MCP::Server::Auth::OAuth] The authentication provider
+        # @param permissions [MCP::Server::Auth::Permissions] The permissions manager
+        def set_auth_middleware(auth_provider, permissions)
+          @auth_provider = auth_provider
+          @permissions = permissions
+          
+          # If this is a server transport, need to integrate with Rack middleware
+          setup_auth_middleware if server_mode?
+        end
+        
+        # Set the authentication token for client requests
+        # @param token [String] The authentication token
+        def set_auth_token(token)
+          @auth_token = token
+          add_auth_header
+          
+          # Update connection if already established
+          reconnect_with_auth if connected?
+        end
+        
+        # Refresh the authentication token
+        # @param token [String] The new authentication token
+        def refresh_auth_token(token)
+          set_auth_token(token)
+        end
 
         private
+        
+        # Check if this transport is in server mode
+        # @return [Boolean] true if in server mode
+        def server_mode?
+          @options[:mode] == :server
+        end
+        
+        # Add authentication header
+        def add_auth_header
+          return unless @auth_token
+          @headers['Authorization'] = "Bearer #{@auth_token}"
+        end
+        
+        # Reconnect with updated authentication
+        def reconnect_with_auth
+          disconnect
+          connect
+        end
+        
+        # Setup authentication middleware for server mode
+        def setup_auth_middleware
+          return unless server_mode? && @auth_provider && @permissions
+          
+          # The actual middleware setup will depend on the server implementation
+          # This will be integrated with the HTTP server framework being used
+          # (e.g., Rack, Sinatra, Rails)
+          @logger.info("Authentication middleware configured with provider: #{@auth_provider.class.name}")
+        end
 
         # Set up WebSocket event handlers
         def setup_event_handlers
@@ -104,11 +168,30 @@ module MCP
 
           @connection.on :close do |event|
             @logger.info("Connection closed: #{event.code} #{event.reason}")
+            
+            # Handle authentication errors
+            if event.code == 1008
+              handle_auth_error(event.reason)
+            end
+            
             @connection = nil
           end
 
           @connection.on :error do |event|
             @logger.error("Connection error: #{event.message}")
+          end
+        end
+        
+        # Handle authentication errors
+        # @param reason [String] The error reason
+        def handle_auth_error(reason)
+          if reason.include?('token expired') && @auth_provider && @options[:auto_refresh]
+            @logger.info("Authentication token expired, attempting to refresh")
+            
+            # Trigger token refresh if configured
+            if @event_handlers['auth.refresh']
+              @event_handlers['auth.refresh'].call
+            end
           end
         end
 
@@ -139,6 +222,12 @@ module MCP
               promise = @response_handlers.delete(message[:id])
               if promise
                 if message[:error]
+                  # Check for authentication errors
+                  if message[:error][:code] == -32000 && 
+                     message[:error][:message]&.include?('authentication')
+                    handle_auth_message_error(message[:error])
+                  end
+                  
                   promise.reject(message[:error])
                 else
                   promise.resolve(message[:result])
@@ -154,6 +243,19 @@ module MCP
             end
           rescue JSON::ParserError => e
             @logger.error("Error parsing message: #{e.message}")
+          end
+        end
+        
+        # Handle authentication errors in messages
+        # @param error [Hash] The error data
+        def handle_auth_message_error(error)
+          if error[:message].include?('token expired') && @options[:auto_refresh]
+            @logger.info("Authentication token expired, attempting to refresh")
+            
+            # Trigger token refresh if configured
+            if @event_handlers['auth.refresh']
+              @event_handlers['auth.refresh'].call
+            end
           end
         end
       end

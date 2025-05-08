@@ -16,6 +16,8 @@ module MCP
         @transport = initialize_transport(options)
         @event_handlers = {}
         @method_handlers = {}
+        @auth_provider = nil
+        @permissions = nil
         @running = false
         
         # Set up the default method handlers
@@ -66,6 +68,19 @@ module MCP
       def on_event(event, &block)
         @event_handlers[event] = block
       end
+      
+      # Set the authentication provider
+      # @param provider [MCP::Server::Auth::OAuth] The authentication provider
+      # @param permissions [MCP::Server::Auth::Permissions] The permissions manager
+      def set_auth_provider(provider, permissions)
+        @auth_provider = provider
+        @permissions = permissions
+        
+        # Update the transport if it's already initialized
+        if @transport && @transport.respond_to?(:set_auth_middleware)
+          @transport.set_auth_middleware(@auth_provider, @permissions)
+        end
+      end
 
       private
 
@@ -74,7 +89,20 @@ module MCP
       # @return [Transport::Base] The transport instance
       def initialize_transport(options)
         transport_options = options[:transport_options] || MCP.configuration.server_transport_options
-        MCP::Protocol.create_transport(transport_options)
+        
+        # Ensure we're using server mode
+        transport_options[:mode] = :server
+        
+        # Set message handler
+        transport_options[:message_handler] = method(:handle_rpc_message)
+        
+        # Add auth provider and permissions if available
+        if @auth_provider && @permissions
+          transport_options[:auth_provider] = @auth_provider
+          transport_options[:permissions] = @permissions
+        end
+        
+        MCP::Protocol.create_server(transport_options)
       end
 
       # Set up the default method handlers
@@ -126,7 +154,66 @@ module MCP
 
       # Handle incoming messages
       def handle_messages
-        # TODO: Implement message handling loop
+        # For server mode with HTTP, the transport handles incoming messages
+        # and calls the message handler
+      end
+      
+      # Handle an RPC message
+      # @param message [Hash] The JSON-RPC message
+      # @return [Hash, nil] The result or nil
+      def handle_rpc_message(message)
+        return nil unless message.is_a?(Hash)
+        
+        method_name = message[:method]
+        params = message[:params]
+        id = message[:id]
+        
+        @logger.debug("Handling method: #{method_name}")
+        
+        # Find the method handler
+        handler = @method_handlers[method_name]
+        
+        if handler
+          begin
+            # Call the handler
+            result = handler.call(params)
+            
+            # Return the result for requests (messages with an ID)
+            if id
+              result
+            else
+              # For notifications, return nil
+              nil
+            end
+          rescue => e
+            @logger.error("Error handling method #{method_name}: #{e.message}")
+            @logger.error(e.backtrace.join("\n"))
+            
+            # Return error for requests
+            if id
+              {
+                code: -32603,
+                message: "Internal error: #{e.message}"
+              }
+            else
+              # For notifications, return nil
+              nil
+            end
+          end
+        else
+          @logger.warn("Unknown method: #{method_name}")
+          
+          # Return method not found error for requests
+          if id
+            {
+              code: -32601,
+              message: "Method not found: #{method_name}"
+            }
+          else
+            # For notifications, return nil
+            nil
+          end
+        end
       end
     end
   end

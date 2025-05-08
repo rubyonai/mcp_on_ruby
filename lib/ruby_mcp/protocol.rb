@@ -5,6 +5,7 @@ require_relative 'protocol/types'
 require_relative 'protocol/connection'
 require_relative 'protocol/transport/base'
 require_relative 'protocol/transport/http'
+require_relative 'protocol/transport/http_server'
 require_relative 'protocol/transport/stdio'
 
 module MCP
@@ -15,10 +16,15 @@ module MCP
     # @return [Transport::Base] A transport instance
     def self.create_transport(options)
       transport_type = options[:transport] || :http
+      mode = options[:mode] || :client
       
       case transport_type
       when :http
-        Transport::HTTP.new(options)
+        if mode == :server
+          Transport::HTTPServer.new(options)
+        else
+          Transport::HTTP.new(options)
+        end
       when :stdio
         Transport::STDIO.new(options)
       else
@@ -37,6 +43,14 @@ module MCP
       connection.initialize_connection(options)
       
       connection
+    end
+    
+    # Create an MCP server
+    # @param options [Hash] The server options
+    # @return [Transport::Base] A server transport instance
+    def self.create_server(options = {})
+      server_options = options.merge(mode: :server)
+      create_transport(server_options)
     end
   end
 end

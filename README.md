@@ -72,6 +72,44 @@ end
 server.start
 ```
 
+### Authenticated Server
+
+Create a server with OAuth 2.1 authentication:
+
+```ruby
+require 'mcp_on_ruby'
+
+# Create the OAuth provider
+oauth_provider = MCP::Server::Auth::OAuth.new(
+  client_id: 'your-client-id',
+  client_secret: 'your-client-secret',
+  token_expiry: 3600,
+  jwt_secret: 'your-jwt-secret',
+  issuer: 'your-server'
+)
+
+# Create the permissions manager
+permissions = MCP::Server::Auth::Permissions.new
+permissions.add_method('tools/list', ['tools:read'])
+permissions.add_method('tools/call', ['tools:call'])
+
+# Create server with authentication
+server = MCP::Server.new
+server.set_auth_provider(oauth_provider, permissions)
+
+# Define tools
+server.tools.define('example') do
+  parameter :name, :string
+  
+  execute do |params|
+    "Hello, #{params[:name]}!"
+  end
+end
+
+# Start the server
+server.start
+```
+
 ## Quick Start: Client
 
 Connect to an MCP server and use its tools:
@@ -86,19 +124,51 @@ client = MCP::Client.new(url: "http://localhost:3000")
 client.connect
 
 # List available tools
-tools = client.list_tools
+tools = client.tools.list
 puts tools
 
 # Call a tool
-result = client.call_tool("weather.get_forecast", location: "San Francisco")
+result = client.tools.call("weather.get_forecast", { location: "San Francisco" })
 puts result.inspect
 
 # Get a resource
-profile = client.get_resource("user.profile")
+profile = client.resources.get("user.profile")
 puts profile.inspect
 
 # Disconnect
 client.disconnect
+```
+
+### Authenticated Client
+
+Connect to an authenticated MCP server:
+
+```ruby
+require 'mcp_on_ruby'
+
+# Create the client
+client = MCP::Client.new(url: "http://localhost:3000/mcp")
+
+# Set up OAuth credentials
+client.set_oauth_credentials(
+  client_id: 'your-client-id',
+  client_secret: 'your-client-secret',
+  site: 'http://localhost:3000',
+  authorize_url: '/oauth/authorize',
+  token_url: '/oauth/token',
+  scopes: ['tools:read', 'tools:call'],
+  auto_refresh: true
+)
+
+# Exchange authorization code for token (after user authorization)
+token = client.exchange_code('authorization_code')
+
+# Or set token directly
+client.set_access_token('your-access-token')
+
+# Connect and use tools with authentication
+client.connect
+results = client.tools.call('example', { name: 'World' })
 ```
 
 ## MCP Implementation
@@ -132,19 +202,46 @@ This library is an implementation of the Model Context Protocol specification:
 MCP on Ruby follows the MCP specification's architecture:
 
 1. **Protocol Layer**: JSON-RPC 2.0 communication over multiple transports
-2. **Server**: Exposes tools, resources, and prompts to clients
+2. **Server**: Exposes tools, resources, prompts, and roots to clients
 3. **Client**: Connects to servers and uses their capabilities
 4. **Authentication**: OAuth 2.1 for secure remote connections
+
+## Security Features
+
+### OAuth 2.1 Authentication
+
+MCP on Ruby supports secure authentication with OAuth 2.1:
+
+- **Token-based Authentication**: Industry-standard OAuth 2.1 flow
+- **JWT Implementation**: Secure token validation and management
+- **Automatic Token Refresh**: Seamless handling of token expiration
+- **Scope-based Authorization**: Fine-grained access control for MCP methods
+
+### Permission Management
+
+- **Method-level Permissions**: Control access to individual MCP methods
+- **Scope Requirements**: Define required scopes for each method
+- **Integration with OAuth**: Leverage OAuth scopes for authorization decisions
+- **Middleware Architecture**: Apply permissions consistently across all requests
 
 ## Advanced Usage
 
 See the [wiki](https://github.com/nagstler/mcp_on_ruby/wiki) for advanced usage, including:
 
 - Creating complex tool hierarchies
-- Implementing custom authentication
+- Implementing custom OAuth providers
+- Configuring method-level permissions
+- Token management and refresh strategies
 - Streaming responses
 - Working with resources and prompts
 - File system integration with roots
+
+Check out the `/examples` directory for complete working examples:
+
+- **Simple Server** - Basic MCP server implementation
+- **Authentication** - OAuth 2.1 integration example
+- **Rails Integration** - Using MCP with Rails
+- **Streaming** - Real-time bidirectional communication
 
 ## Development
 

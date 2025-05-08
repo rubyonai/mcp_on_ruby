@@ -5,6 +5,7 @@ require_relative 'client/retry'
 require_relative 'client/streaming'
 require_relative 'client/sampling'
 require_relative 'client/roots'
+require_relative 'client/auth'
 
 module MCP
   # Creates a new client instance with optional block configuration
@@ -19,6 +20,17 @@ module MCP
     client.extend(Client::Streaming)
     client.extend(Client::Sampling)
     client.extend(Client::Roots)
+    client.extend(Client::Auth)
+    
+    # Configure OAuth if options are provided
+    if options[:oauth]
+      client.set_oauth_credentials(options[:oauth])
+    end
+    
+    # Set access token if provided
+    if options[:access_token]
+      client.set_access_token(options[:access_token])
+    end
     
     yield client if block_given?
     client
@@ -161,6 +173,41 @@ module MCP
     # @param handler [Proc] The handler function
     def set_sampling_handler(handler)
       @client.set_sampling_handler(handler)
+    end
+    
+    # Set OAuth credentials
+    # @param options [Hash] OAuth options
+    def set_oauth_credentials(options)
+      @client.set_oauth_credentials(options)
+    end
+    
+    # Get an authorization URL
+    # @param state [String] State parameter for CSRF protection
+    # @param redirect_uri [String] The redirect URI
+    # @param scopes [Array<String>] The requested scopes
+    # @return [String] The authorization URL
+    def authorization_url(state, redirect_uri = nil, scopes = nil)
+      @client.authorization_url(state, redirect_uri, scopes)
+    end
+    
+    # Exchange an authorization code for a token
+    # @param code [String] The authorization code
+    # @param redirect_uri [String] The redirect URI
+    # @return [OAuth2::AccessToken] The access token
+    def exchange_code(code, redirect_uri = nil)
+      @client.exchange_code(code, redirect_uri)
+    end
+    
+    # Refresh the access token
+    # @return [OAuth2::AccessToken] The refreshed access token
+    def refresh_token
+      @client.refresh_token
+    end
+    
+    # Set an access token directly
+    # @param token [String, OAuth2::AccessToken] The access token
+    def set_access_token(token)
+      @client.set_access_token(token)
     end
     
     # Forward other methods to the client instance

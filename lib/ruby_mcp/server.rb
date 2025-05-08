@@ -8,6 +8,7 @@ require_relative 'server/prompts/prompt'
 require_relative 'server/prompts/manager'
 require_relative 'server/roots/root'
 require_relative 'server/roots/manager'
+require_relative 'server/auth'
 require_relative 'server/dsl'
 require_relative 'server/server'
 
@@ -18,6 +19,19 @@ module MCP
   # @return [Server::Server] The server instance
   def self.Server(options = {})
     server = Server::Server.new(options)
+    
+    # Set up authentication if enabled
+    if options[:auth_enabled] || MCP.configuration.auth_enabled
+      auth_options = options[:auth_options] || MCP.configuration.auth_options
+      
+      case options[:auth_method] || MCP.configuration.auth_method
+      when :oauth
+        auth_provider = Server::Auth.create_oauth_provider(auth_options)
+        permissions = Server::Auth.create_permissions_manager(auth_provider)
+        server.set_auth_provider(auth_provider, permissions)
+      end
+    end
+    
     yield server if block_given?
     server
   end
@@ -53,6 +67,13 @@ module MCP
     # @return [Boolean] true if the server is running
     def running?
       @server.running?
+    end
+    
+    # Set the authentication provider
+    # @param provider [MCP::Server::Auth::OAuth] The authentication provider
+    # @param permissions [MCP::Server::Auth::Permissions] The permissions manager
+    def set_auth_provider(provider, permissions)
+      @server.set_auth_provider(provider, permissions)
     end
     
     # Forward other methods to the server instance

@@ -13,17 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Server implementation with tools, resources, prompts, and roots
 - Client implementation for connecting to MCP servers
 - HTTP and STDIO transport options
-- OAuth 2.1 authentication for remote connections
 - Comprehensive test suite
 - Detailed documentation
 
-## [0.2.0] - 2024-xx-xx
+## [0.2.0] - 2024-07-24
 
 ### Added
-- Redis storage backend for conversation persistence
-- Improved error handling and reporting
+- OAuth 2.1 authentication for secure remote connections
+- Permission-based access control for MCP methods
+- JWT token validation and management
+- Automatic token refresh mechanism
+- HTTP transport authentication integration
+- Middleware architecture for server authentication
+- Authentication examples and documentation
 
-## [0.1.0] - 2024-xx-xx
+## [0.1.0] - 2024-06-15
 
 ### Added
-- Initial release with basic REST API functionality
+- Initial implementation of core MCP protocol
+- JSON-RPC 2.0 message format
+- HTTP and STDIO transports
+- Basic server and client functionality
+- Tool definition and execution
+- Resource management
+- Prompt handling
+- Root filesystem access
