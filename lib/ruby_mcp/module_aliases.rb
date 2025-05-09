@@ -32,6 +32,12 @@ module MCP
     DSL = ::MCP::Server::DSL unless defined?(MCP::Server::DSL)
     Auth = ::MCP::Server::Auth unless defined?(MCP::Server::Auth)
     
+    module Auth
+      OAuth = ::MCP::Server::Auth::OAuth unless defined?(MCP::Server::Auth::OAuth)
+      Permissions = ::MCP::Server::Auth::Permissions unless defined?(MCP::Server::Auth::Permissions)
+      Middleware = ::MCP::Server::Auth::Middleware unless defined?(MCP::Server::Auth::Middleware)
+    end
+    
     module Tools
       Tool = ::MCP::Server::Tools::Tool unless defined?(MCP::Server::Tools::Tool)
       Manager = ::MCP::Server::Tools::Manager unless defined?(MCP::Server::Tools::Manager)
