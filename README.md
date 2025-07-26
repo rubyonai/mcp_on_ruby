@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Ruby Version](https://img.shields.io/badge/Ruby-2.7%2B-red.svg)](https://www.ruby-lang.org/)
 
-**Production-ready Model Context Protocol (MCP) server for Rails applications**
+**Model Context Protocol (MCP) server for Rails applications**
 
 Build AI-powered integrations with tools, resources, authentication, and real-time capabilities.
 
@@ -24,7 +24,7 @@ Build AI-powered integrations with tools, resources, authentication, and real-ti
 📊 **Resources System** - Data exposure with URI templating  
 🔒 **Security** - DNS rebinding protection, CORS, token authentication  
 ⚡ **Real-time** - Server-Sent Events (SSE) foundation (full implementation coming soon)  
-🎯 **Developer-Friendly** - Clean DSL, comprehensive generators, testing support  
+🎯 **Developer-Friendly** - Clean DSL, generators, testing support  
 
 ## Installation
 
@@ -177,14 +177,14 @@ rails server
 │  └── ...                     └── ...                        │
 ├─────────────────────────────────────────────────────────────┤
 │                    MCP Server Core                          │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌──────────────┐  │
-│  │     Tools       │ │    Resources    │ │  Transport   │  │
-│  │  - Validation   │ │  - Templating   │ │  - HTTP      │  │
-│  │  - Authorization│ │  - Authorization│ │  - SSE       │  │
-│  │  - Execution    │ │  - Content      │ │  - Security  │  │
-│  └─────────────────┘ └─────────────────┘ └──────────────┘  │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌──────────────┐   │
+│  │     Tools       │ │    Resources    │ │  Transport   │   │
+│  │  - Validation   │ │  - Templating   │ │  - HTTP      │   │
+│  │  - Authorization│ │  - Authorization│ │  - SSE       │   │
+│  │  - Execution    │ │  - Content      │ │  - Security  │   │
+│  └─────────────────┘ └─────────────────┘ └──────────────┘   │
 ├─────────────────────────────────────────────────────────────┤
-│                  JSON-RPC Protocol                         │
+│                  JSON-RPC Protocol                          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -468,11 +468,15 @@ Production dependencies (minimal footprint):
 
 This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-- The [Model Context Protocol](https://modelcontextprotocol.io) team for creating the specification
-- The Ruby and Rails communities for conventions and best practices
+- The [Model Context Protocol](https://modelcontextprotocol.io) team at Anthropic for creating the specification
+- The Ruby on Rails community for inspiration and conventions
 
 ---
 
-**Ready to build AI-powered Rails applications?** Start with `rails generate mcp_on_ruby:install` and create your first tool in minutes!
+<div align="center">
+
+Made with ❤️ for the Ruby community
+
+</div>
