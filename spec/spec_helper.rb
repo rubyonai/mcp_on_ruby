@@ -5,13 +5,13 @@ SimpleCov.start do
   add_filter '/spec/'
   add_filter '/vendor/'
   
-  add_group 'Protocol', 'lib/ruby_mcp/protocol'
-  add_group 'Server', 'lib/ruby_mcp/server'
-  add_group 'Client', 'lib/ruby_mcp/client'
-  add_group 'Auth', ['lib/ruby_mcp/server/auth', 'lib/ruby_mcp/client/auth']
+  add_group 'Protocol', 'lib/mcp_on_ruby/protocol'
+  add_group 'Server', 'lib/mcp_on_ruby/server'
+  add_group 'Client', 'lib/mcp_on_ruby/client'
+  add_group 'Auth', ['lib/mcp_on_ruby/server/auth', 'lib/mcp_on_ruby/client/auth']
 end
 
-require 'ruby_mcp'
+require 'mcp_on_ruby'
 require 'webmock/rspec'
 require 'securerandom'
 require 'json'

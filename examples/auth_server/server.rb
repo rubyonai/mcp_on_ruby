@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'ruby_mcp'
+require 'mcp_on_ruby'
 require 'logger'
 
 # Create a logger

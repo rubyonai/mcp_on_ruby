@@ -263,7 +263,7 @@ RSpec.describe "Example code verification" do
       expect(routes_rb).to include('mount MCP::Server::RailsEngine => "/mcp"')
       
       # Check the initializer
-      initializer = File.read(File.join(__dir__, '../../examples/rails_integration/ruby_mcp_initializer.rb'))
+      initializer = File.read(File.join(__dir__, '../../examples/rails_integration/mcp_on_ruby_initializer.rb'))
       
       # Verify it contains the key components
       expect(initializer).to include('MCP.configure do |config|')

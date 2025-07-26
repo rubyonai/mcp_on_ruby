@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require_relative 'lib/ruby_mcp/version'
+require_relative 'lib/mcp_on_ruby/version'
 
 Gem::Specification.new do |spec|
   spec.name = 'mcp_on_ruby'
-  spec.version = MCP::VERSION
+  spec.version = McpOnRuby::VERSION
   spec.authors = ['Nagendra Dhanakeerthi']
   spec.email = ['your-email@example.com']
 
-  spec.summary = 'Ruby implementation of the Model Context Protocol (MCP)'
-  spec.description = 'A Ruby library for building MCP clients and servers that follow the specification.'
+  spec.summary = 'Production-ready MCP server for Rails applications'
+  spec.description = 'A comprehensive Ruby library for building Model Context Protocol (MCP) servers in Rails applications, featuring tools, resources, authentication, and real-time capabilities.'
   spec.homepage = 'https://github.com/nagstler/mcp_on_ruby'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.7.0'
@@ -23,13 +23,8 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'concurrent-ruby', '~> 1.2'
-  spec.add_dependency 'faye-websocket', '~> 0.11'
   spec.add_dependency 'json-schema', '~> 3.0'
-  spec.add_dependency 'jwt', '~> 2.7'
-  spec.add_dependency 'oauth2', '~> 1.4'
   spec.add_dependency 'rack', '~> 2.2'
-  spec.add_dependency 'securerandom', '~> 0.2'
   spec.add_dependency 'webrick', '~> 1.7'
 
   spec.add_development_dependency 'rake', '~> 13.0'
