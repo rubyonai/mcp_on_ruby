@@ -431,15 +431,19 @@ class MyResource < McpOnRuby::Resource
 end
 ```
 
-## Examples
+## Getting Started
 
-See [examples directory](/examples) for complete working examples:
+After installation, use the Rails generators to create tools and resources:
 
-- **Basic Rails Integration** - Simple setup with tools and resources
-- **Authentication Examples** - JWT and token-based auth
-- **Advanced Tools** - Database operations, file processing
-- **Real-time Resources** - SSE updates and live data
-- **Production Setup** - Security, monitoring, deployment
+```bash
+# Generate a new tool
+rails generate mcp_on_ruby:tool MyTool --description "Does something useful"
+
+# Generate a new resource
+rails generate mcp_on_ruby:resource MyResource --uri "data/{id}" --template
+```
+
+Check the generated files in `app/tools/` and `app/resources/` for implementation examples.
 
 ## Requirements
 
