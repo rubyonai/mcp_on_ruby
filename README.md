@@ -8,9 +8,9 @@
 
 **Model Context Protocol (MCP) server for Rails applications**
 
-Build AI-powered integrations with tools, resources, authentication, and real-time capabilities.
+Build AI integrations with tools, resources, authentication, and real-time capabilities.
 
-[Documentation](https://rubydoc.info/gems/mcp_on_ruby) | [Examples](#examples) | [Contributing](#contributing)
+[Documentation](https://rubydoc.info/gems/mcp_on_ruby) | [Contributing](#contributing)
 
 </div>
 
@@ -164,8 +164,6 @@ rails server
 ```
 
 ## Architecture
-
-### Clean Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
