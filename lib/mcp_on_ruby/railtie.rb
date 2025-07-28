@@ -9,7 +9,10 @@ if defined?(Rails)
         # Add app/tools and app/resources to autoload paths
         %w[tools resources].each do |dir|
           path = app.root.join("app", dir)
-          app.config.autoload_paths << path.to_s if path.exist?
+          if path.exist? && !app.config.autoload_paths.include?(path.to_s)
+            app.config.autoload_paths = app.config.autoload_paths.dup if app.config.autoload_paths.frozen?
+            app.config.autoload_paths << path.to_s
+          end
         end
       end
 
@@ -38,9 +41,23 @@ if defined?(Rails)
         app.config.mcp.auto_register_resources = true
       end
 
-      # Auto-register tools and resources after application initialization
-      config.after_initialize do |app|
+      # Setup MCP middleware
+      initializer "mcp_on_ruby.setup_middleware", after: :load_config_initializers do |app|
         next unless app.config.mcp.enabled
+
+        # Eager load MCP classes in development
+        if Rails.env.development?
+          tools_path = app.root.join('app/tools')
+          resources_path = app.root.join('app/resources')
+          
+          if tools_path.exist?
+            Dir[tools_path.join('**/*.rb')].each { |file| require_dependency file }
+          end
+          
+          if resources_path.exist?
+            Dir[resources_path.join('**/*.rb')].each { |file| require_dependency file }
+          end
+        end
 
         # Create MCP server instance
         server = McpOnRuby.server do |s|
@@ -61,8 +78,8 @@ if defined?(Rails)
           end
         end
 
-        # Mount the server middleware
-        app.config.middleware.use(
+        # Mount the server middleware (before the stack is frozen)
+        app.middleware.use(
           McpOnRuby::Transport::RackMiddleware,
           server: server,
           path: app.config.mcp.path,

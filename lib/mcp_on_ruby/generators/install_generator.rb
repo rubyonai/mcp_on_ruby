@@ -39,7 +39,7 @@ module McpOnRuby
       private
 
       def readme(path)
-        say IO.read(File.join(source_root, path)), :green if File.exist?(File.join(source_root, path))
+        say IO.read(File.join(self.class.source_root, path)), :green if File.exist?(File.join(self.class.source_root, path))
       end
     end
   end

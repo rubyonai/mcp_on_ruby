@@ -20,10 +20,10 @@ Build AI integrations with tools, resources, authentication, and real-time capab
 
 🚀 **Production-Ready** - Authentication, rate limiting, error handling, security  
 🔧 **Rails Integration** - Generators, autoloading, middleware, Railtie  
-🛠️ **Tools System** - AI-callable functions with JSON Schema validation  
+🛠️ **Tools System** - Callable functions with JSON Schema validation  
 📊 **Resources System** - Data exposure with URI templating  
 🔒 **Security** - DNS rebinding protection, CORS, token authentication  
-⚡ **Real-time** - Server-Sent Events (SSE) foundation (full implementation coming soon)  
+⚡ **Real-time** - Server Events (SSE) foundation (full implementation coming soon)  
 🎯 **Developer-Friendly** - Clean DSL, generators, testing support  
 
 ## Installation
@@ -468,7 +468,7 @@ Production dependencies (minimal footprint):
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) file for details.
 
 ## 🙏 Acknowledgments
 
