@@ -10,7 +10,8 @@
 
 Expose your Rails app as an AI accessible interface — define tools and resources the Rails way.
 
-[Documentation](https://rubydoc.info/gems/mcp_on_ruby) | [Contributing](#contributing)
+![MCP](https://github.com/user-attachments/assets/12c3c244-0026-47b0-861e-e40d731ac4e6)
+
 
 </div>
 
